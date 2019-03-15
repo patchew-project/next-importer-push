@@ -348,6 +348,11 @@ safe_stack=""
 use_containers="yes"
 gdb_bin=$(command -v "gdb-multiarch" || command -v "gdb")
 
+if printf "%s" "$(realpath "$source_path")" | grep -q "[[:space:]:]";
+then
+  error_exit "main directory cannot contain spaces nor colons"
+fi
+
 if test -e "$source_path/.git"
 then
     git_update=yes
