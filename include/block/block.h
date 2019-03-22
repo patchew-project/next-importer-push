@@ -420,6 +420,9 @@ int bdrv_freeze_backing_chain(BlockDriverState *bs, BlockDriverState *base,
 void bdrv_unfreeze_backing_chain(BlockDriverState *bs, BlockDriverState *base);
 int coroutine_fn bdrv_co_delete_file(BlockDriverState *bs, Error **errp);
 
+bool bdrv_path_is_regular_file(const char *path);
+int coroutine_fn bdrv_co_delete_file_generic(const char *filename,
+                                             Error **errp);
 
 typedef struct BdrvCheckResult {
     int corruptions;
