@@ -423,6 +423,9 @@ int coroutine_fn bdrv_co_delete_file(BlockDriverState *bs, Error **errp);
 bool bdrv_path_is_regular_file(const char *path);
 int coroutine_fn bdrv_co_delete_file_generic(const char *filename,
                                              Error **errp);
+int bdrv_delete_file(const char *filename, const char *fmt,
+                     Error **errp);
+
 
 typedef struct BdrvCheckResult {
     int corruptions;
