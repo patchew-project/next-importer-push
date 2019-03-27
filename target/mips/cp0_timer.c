@@ -33,7 +33,7 @@
 uint32_t cpu_mips_get_random(CPUMIPSState *env)
 {
     static uint32_t seed = 1;
-    static uint32_t prev_idx = 0;
+    static uint32_t prev_idx;
     uint32_t idx;
     uint32_t nb_rand_tlb = env->tlb->nb_tlb - env->CP0_Wired;
 
