@@ -2176,6 +2176,8 @@ R: John Snow <jsnow@redhat.com>
 L: qemu-block@nongnu.org
 S: Supported
 F: include/qemu/hbitmap.h
+F: include/qemu/bitmap.h
+F: include/qemu/bitops.h
 F: include/block/dirty-bitmap.h
 F: block/monitor/bitmap-qmp-cmds.c
 F: block/dirty-bitmap.c
