@@ -1906,10 +1906,24 @@ static int vhost_user_backend_init(struct vhost_dev *dev, void *opaque)
 static int vhost_user_backend_cleanup(struct vhost_dev *dev)
 {
     struct vhost_user *u;
+    VhostUserState *user;
+    int i;
 
     assert(dev->vhost_ops->backend_type == VHOST_BACKEND_TYPE_USER);
 
     u = dev->opaque;
+
+    if (dev->vq_index == 0) {
+        user = u->user;
+        for (i = 0; i < VIRTIO_QUEUE_MAX; i++) {
+            if (user->notifier[i].addr) {
+                object_unparent(OBJECT(&user->notifier[i].mr));
+                munmap(user->notifier[i].addr, qemu_real_host_page_size);
+                user->notifier[i].addr = NULL;
+            }
+        }
+    }
+
     if (u->postcopy_notifier.notify) {
         postcopy_remove_notifier(&u->postcopy_notifier);
         u->postcopy_notifier.notify = NULL;
@@ -2331,6 +2345,8 @@ bool vhost_user_init(VhostUserState *user, CharBackend *chr, Error **errp)
         error_setg(errp, "Cannot initialize vhost-user state");
         return false;
     }
+
+    memset(user, 0, sizeof(*user));
     user->chr = chr;
     user->memory_slots = 0;
     return true;
