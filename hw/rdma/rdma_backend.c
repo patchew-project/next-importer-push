@@ -16,6 +16,11 @@
 #include "qemu/osdep.h"
 #include "qapi/qapi-events-rdma.h"
 
+#include "linux/if_addr.h"
+#include "libmnl/libmnl.h"
+#include "linux/rtnetlink.h"
+#include "net/if.h"
+
 #include <infiniband/verbs.h>
 
 #include "contrib/rdmacm-mux/rdmacm-mux.h"
@@ -46,6 +51,61 @@ static void (*comp_handler)(void *ctx, struct ibv_wc *wc);
 static void dummy_comp_handler(void *ctx, struct ibv_wc *wc)
 {
     rdma_error_report("No completion handler is registered");
+}
+
+static int netlink_route_update(const char *ifname, union ibv_gid *gid,
+                                __u16 type)
+{
+    char buf[MNL_SOCKET_BUFFER_SIZE];
+    struct nlmsghdr *nlh;
+    struct ifaddrmsg *ifm;
+    struct mnl_socket *nl;
+    int ret;
+    uint32_t ipv4;
+
+    nl = mnl_socket_open(NETLINK_ROUTE);
+    if (!nl) {
+        rdma_error_report("Fail to connect to netlink\n");
+        return -EIO;
+    }
+
+    ret = mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID);
+    if (ret < 0) {
+        rdma_error_report("Fail to bind to netlink\n");
+        goto out;
+    }
+
+    nlh = mnl_nlmsg_put_header(buf);
+    nlh->nlmsg_type = type;
+    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL;
+    nlh->nlmsg_seq = 1;
+
+    ifm = mnl_nlmsg_put_extra_header(nlh, sizeof(*ifm));
+    ifm->ifa_index = if_nametoindex(ifname);
+    if (gid->global.subnet_prefix) {
+        ifm->ifa_family = AF_INET6;
+        ifm->ifa_prefixlen = 64;
+        ifm->ifa_flags = IFA_F_PERMANENT;
+        ifm->ifa_scope = RT_SCOPE_UNIVERSE;
+        mnl_attr_put(nlh, IFA_ADDRESS, sizeof(*gid), gid);
+    } else {
+        ifm->ifa_family = AF_INET;
+        ifm->ifa_prefixlen = 24;
+        memcpy(&ipv4, (char *)&gid->global.interface_id + 4, sizeof(ipv4));
+        mnl_attr_put(nlh, IFA_LOCAL, 4, &ipv4);
+    }
+
+    ret = mnl_socket_sendto(nl, nlh, nlh->nlmsg_len);
+    if (ret < 0) {
+        rdma_error_report("Fail to send msg to to netlink\n");
+        goto out;
+    }
+
+    ret = 0;
+
+out:
+    mnl_socket_close(nl);
+    return ret;
 }
 
 static inline void complete_work(enum ibv_wc_status status, uint32_t vendor_err,
@@ -1250,7 +1310,13 @@ int rdma_backend_add_gid(RdmaBackendDev *backend_dev, const char *ifname,
                                             gid->global.subnet_prefix,
                                             gid->global.interface_id);
 
-    return ret;
+    /*
+     * We ignore return value since operation might have completed
+     * successfully by the QMP consumer
+     */
+    netlink_route_update(ifname, gid, RTM_NEWADDR);
+
+    return 0;
 }
 
 int rdma_backend_del_gid(RdmaBackendDev *backend_dev, const char *ifname,
@@ -1275,6 +1341,12 @@ int rdma_backend_del_gid(RdmaBackendDev *backend_dev, const char *ifname,
     qapi_event_send_rdma_gid_status_changed(ifname, false,
                                             gid->global.subnet_prefix,
                                             gid->global.interface_id);
+
+    /*
+     * We ignore return value since operation might have completed
+     * successfully by the QMP consumer
+     */
+    netlink_route_update(ifname, gid, RTM_DELADDR);
 
     return 0;
 }
