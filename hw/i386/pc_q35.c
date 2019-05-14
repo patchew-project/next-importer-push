@@ -414,6 +414,7 @@ static void pc_q35_4_0_1_machine_options(MachineClass *m)
 {
     PCMachineClass *pcmc = PC_MACHINE_CLASS(m);
     pc_q35_4_1_machine_options(m);
+    m->default_kernel_irqchip_split = true;
     m->alias = NULL;
     pcmc->default_cpu_version = CPU_VERSION_LEGACY;
     /*
