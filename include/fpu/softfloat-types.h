@@ -144,6 +144,7 @@ typedef enum __attribute__((__packed__)) {
 
 enum {
     float_flag_invalid   =  1,
+    float_flag_rounded   =  2,
     float_flag_divbyzero =  4,
     float_flag_overflow  =  8,
     float_flag_underflow = 16,
