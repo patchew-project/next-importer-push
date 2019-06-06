@@ -20,6 +20,7 @@
 #include "hw/qdev-properties.h"
 #include "cpu-models.h"
 #include "sysemu/kvm.h"
+#include "kvm_ppc.h"
 
 #include "trace.h"
 
@@ -410,6 +411,15 @@ void spapr_irq_free(SpaprMachineState *spapr, int irq, int num)
                 sicc->free_irq(intc, i);
             }
         }
+    }
+
+    /*
+     * KVM may be too old to support XIVE, in which case we'd rather try
+     * to use the in-kernel XICS instead of the emulated XIVE.
+     */
+    if (kvm_enabled() && !kvmppc_has_cap_xive() &&
+        spapr->irq == &spapr_irq_dual) {
+        spapr->irq = &spapr_irq_xics;
     }
 }
 
