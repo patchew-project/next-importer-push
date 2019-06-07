@@ -687,7 +687,7 @@ qio_channel_socket_set_delay(QIOChannel *ioc,
 }
 
 
-static void
+static int
 qio_channel_socket_set_cork(QIOChannel *ioc,
                             bool enabled)
 {
@@ -695,6 +695,7 @@ qio_channel_socket_set_cork(QIOChannel *ioc,
     int v = enabled ? 1 : 0;
 
     socket_set_cork(sioc->fd, v);
+    return 0;
 }
 
 
