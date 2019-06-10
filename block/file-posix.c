@@ -330,7 +330,9 @@ static bool dio_byte_aligned(int fd)
  */
 static bool raw_is_io_aligned(int fd, void *buf, size_t len)
 {
+    qemu_mutex_unlock_iothread();
     ssize_t ret = pread(fd, buf, len, 0);
+    qemu_mutex_lock_iothread();
 
     if (ret >= 0) {
         return true;
