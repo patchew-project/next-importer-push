@@ -1432,6 +1432,98 @@ class TestFilters(iotests.QMPTestCase):
         self.complete_and_wait('mirror')
 
 
+class TestReconfDuringMirror(iotests.QMPTestCase):
+    def setUp(self):
+        qemu_img('create', '-f', iotests.imgfmt, backing_img, '1M')
+        qemu_img('create', '-f', iotests.imgfmt, '-b', backing_img,
+                 '-F', iotests.imgfmt, test_img)
+
+        qemu_io('-c', 'write -P 1 0 1M', test_img)
+
+        self.vm = iotests.VM()
+        self.vm.launch()
+
+        blockdevs = (
+            { 'node-name': 'backing-file',
+              'driver': 'file',
+              'filename': backing_img },
+
+            { 'node-name': 'backing',
+              'driver': iotests.imgfmt,
+              'file': 'backing-file',
+              'read-only': True },
+
+            { 'node-name': 'source-file',
+              'driver': 'file',
+              'filename': test_img },
+
+            { 'node-name': 'source',
+              'driver': iotests.imgfmt,
+              'file': 'source-file',
+              'backing': 'backing' }
+        )
+
+        for blockdev in blockdevs:
+            result = self.vm.qmp('blockdev-add', **blockdev)
+            self.assert_qmp(result, 'return', {})
+
+    def tearDown(self):
+        self.vm.shutdown()
+
+        os.remove(test_img)
+        os.remove(backing_img)
+
+        try:
+            os.remove(target_img)
+        except OSError:
+            pass
+
+    def test_reconf_during_top_mirror(self):
+        result = self.vm.qmp('drive-mirror',
+                             job_id='mirror',
+                             device='source',
+                             sync='top',
+                             target=target_img,
+                             speed=65536)
+        self.assert_qmp(result, 'return', {})
+
+        result = self.vm.qmp('x-blockdev-reopen',
+                             **{ 'node-name': 'source',
+                                 'driver': iotests.imgfmt,
+                                 'file': 'source-file',
+                                 'backing': None })
+        if 'error' in result:
+            self.assert_qmp(result, 'error/desc',
+                            "Cannot change 'backing' link "
+                            "from 'source' to 'backing'")
+
+            result = self.vm.qmp('block-job-set-speed',
+                                 device='mirror', speed=0)
+            self.assert_qmp(result, 'return', {})
+
+            self.complete_and_wait('mirror')
+
+            # Pass
+            return
+
+        # This is not expected.  Let's see what happens when we drop
+        # the backing file altogether.
+        for node in ('backing', 'backing-file'):
+            result = self.vm.qmp('blockdev-del', node_name=node)
+            self.assert_qmp(result, 'return', {})
+
+        result = self.vm.qmp('block-job-set-speed',
+                             device='mirror', speed=0)
+        self.assert_qmp(result, 'return', {})
+
+        # Completing will now probably result in a segfault, because
+        # it tries to assign 'backing' as the target's backing node
+        self.complete_and_wait('mirror')
+
+        # Either way, this is a failure.
+        self.fail('x-blockdev-reopen should not have succeeded')
+
+
 if __name__ == '__main__':
     iotests.main(supported_fmts=['qcow2', 'qed'],
                  supported_protocols=['file'],
