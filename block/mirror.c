@@ -42,6 +42,7 @@ typedef struct MirrorBlockJob {
     BlockBackend *target;
     BlockDriverState *mirror_top_bs;
     BlockDriverState *base;
+    /* Overlay of @base if @base is non-NULL; NULL otherwise */
     BlockDriverState *base_overlay;
 
     /* The name of the graph node to replace */
@@ -839,8 +840,9 @@ static int coroutine_fn mirror_dirty_init(MirrorBlockJob *s)
             return 0;
         }
 
-        ret = bdrv_is_allocated_above(bs, s->base_overlay, true, offset, bytes,
-                                      &count);
+        ret = bdrv_is_allocated_above(bs, s->base_overlay,
+                                      s->base_overlay != NULL,
+                                      offset, bytes, &count);
         if (ret < 0) {
             return ret;
         }
@@ -1710,7 +1712,7 @@ static BlockJob *mirror_start_job(
     s->zero_target = zero_target;
     s->copy_mode = copy_mode;
     s->base = base;
-    s->base_overlay = bdrv_find_overlay(bs, base);
+    s->base_overlay = base ? bdrv_find_overlay(bs, base) : NULL;
     s->granularity = granularity;
     s->buf_size = ROUND_UP(buf_size, granularity);
     s->unmap = unmap;
