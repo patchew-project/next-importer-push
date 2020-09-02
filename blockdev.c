@@ -1673,11 +1673,11 @@ static void external_snapshot_clean(BlkActionState *common)
     aio_context_release(aio_context);
 }
 
-typedef struct DriveBackupState {
+typedef struct BlockJobActionState {
     BlkActionState common;
     BlockDriverState *bs;
     BlockJob *job;
-} DriveBackupState;
+} BlockJobActionState;
 
 static BlockJob *do_backup_common(BackupCommon *backup,
                                   BlockDriverState *bs,
@@ -1687,7 +1687,7 @@ static BlockJob *do_backup_common(BackupCommon *backup,
 
 static void drive_backup_prepare(BlkActionState *common, Error **errp)
 {
-    DriveBackupState *state = DO_UPCAST(DriveBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     DriveBackup *backup;
     BlockDriverState *bs;
     BlockDriverState *target_bs;
@@ -1835,7 +1835,7 @@ out:
 
 static void drive_backup_commit(BlkActionState *common)
 {
-    DriveBackupState *state = DO_UPCAST(DriveBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     AioContext *aio_context;
 
     aio_context = bdrv_get_aio_context(state->bs);
@@ -1849,7 +1849,7 @@ static void drive_backup_commit(BlkActionState *common)
 
 static void drive_backup_abort(BlkActionState *common)
 {
-    DriveBackupState *state = DO_UPCAST(DriveBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
 
     if (state->job) {
         AioContext *aio_context;
@@ -1865,7 +1865,7 @@ static void drive_backup_abort(BlkActionState *common)
 
 static void drive_backup_clean(BlkActionState *common)
 {
-    DriveBackupState *state = DO_UPCAST(DriveBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     AioContext *aio_context;
 
     if (!state->bs) {
@@ -1880,15 +1880,9 @@ static void drive_backup_clean(BlkActionState *common)
     aio_context_release(aio_context);
 }
 
-typedef struct BlockdevBackupState {
-    BlkActionState common;
-    BlockDriverState *bs;
-    BlockJob *job;
-} BlockdevBackupState;
-
 static void blockdev_backup_prepare(BlkActionState *common, Error **errp)
 {
-    BlockdevBackupState *state = DO_UPCAST(BlockdevBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     BlockdevBackup *backup;
     BlockDriverState *bs;
     BlockDriverState *target_bs;
@@ -1936,7 +1930,7 @@ static void blockdev_backup_prepare(BlkActionState *common, Error **errp)
 
 static void blockdev_backup_commit(BlkActionState *common)
 {
-    BlockdevBackupState *state = DO_UPCAST(BlockdevBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     AioContext *aio_context;
 
     aio_context = bdrv_get_aio_context(state->bs);
@@ -1950,7 +1944,7 @@ static void blockdev_backup_commit(BlkActionState *common)
 
 static void blockdev_backup_abort(BlkActionState *common)
 {
-    BlockdevBackupState *state = DO_UPCAST(BlockdevBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
 
     if (state->job) {
         AioContext *aio_context;
@@ -1966,7 +1960,7 @@ static void blockdev_backup_abort(BlkActionState *common)
 
 static void blockdev_backup_clean(BlkActionState *common)
 {
-    BlockdevBackupState *state = DO_UPCAST(BlockdevBackupState, common, common);
+    BlockJobActionState *state = DO_UPCAST(BlockJobActionState, common, common);
     AioContext *aio_context;
 
     if (!state->bs) {
@@ -2238,14 +2232,14 @@ static const BlkActionOps actions[] = {
         .clean = external_snapshot_clean,
     },
     [TRANSACTION_ACTION_KIND_DRIVE_BACKUP] = {
-        .instance_size = sizeof(DriveBackupState),
+        .instance_size = sizeof(BlockJobActionState),
         .prepare = drive_backup_prepare,
         .commit = drive_backup_commit,
         .abort = drive_backup_abort,
         .clean = drive_backup_clean,
     },
     [TRANSACTION_ACTION_KIND_BLOCKDEV_BACKUP] = {
-        .instance_size = sizeof(BlockdevBackupState),
+        .instance_size = sizeof(BlockJobActionState),
         .prepare = blockdev_backup_prepare,
         .commit = blockdev_backup_commit,
         .abort = blockdev_backup_abort,
