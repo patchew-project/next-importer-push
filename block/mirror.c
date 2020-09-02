@@ -649,8 +649,8 @@ static int mirror_exit_common(Job *job)
     src = mirror_top_bs->backing->bs;
     target_bs = blk_bs(s->target);
 
-    if (bdrv_chain_contains(src, target_bs)) {
-        bdrv_unfreeze_backing_chain(mirror_top_bs, target_bs);
+    if (s->base) {
+        bdrv_unfreeze_backing_chain(mirror_top_bs, s->base);
     }
 
     bdrv_release_dirty_bitmap(s->dirty_bitmap);
@@ -1780,8 +1780,22 @@ static BlockJob *mirror_start_job(
                 goto fail;
             }
         }
+    }
 
-        if (bdrv_freeze_backing_chain(mirror_top_bs, target, errp) < 0) {
+    if (s->base) {
+        /*
+         * For active commit or mirror with sync=top, we need to
+         * freeze the backing chain down to the base, because we keep
+         * pointers to it and its overlay.  For other cases (mirror
+         * with sync=full or sync=none), we do not, so there is no
+         * need to freeze any part of the chain.
+         * (s->base is non-NULL only in these cases.)
+         */
+        if (target_is_backing) {
+            assert(s->base == target);
+        }
+
+        if (bdrv_freeze_backing_chain(mirror_top_bs, s->base, errp) < 0) {
             goto fail;
         }
     }
