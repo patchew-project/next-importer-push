@@ -699,6 +699,18 @@ static MemoryRegion *memory_region_get_flatview_root(MemoryRegion *mr)
     return NULL;
 }
 
+static bool skip_simplify(void)
+{
+    char vendor[CPUID_VENDOR_SZ + 1] = { 0 };
+    host_get_vendor(vendor);
+    if (!strncmp(vendor, CPUID_VENDOR_VIA, strlen(CPUID_VENDOR_VIA))
+        || !strncmp(vendor, CPUID_VENDOR_ZHAOXIN,
+                    strlen(CPUID_VENDOR_ZHAOXIN))) {
+        return true;
+    }
+    return false;
+}
+
 /* Render a memory topology into a list of disjoint absolute ranges. */
 static FlatView *generate_memory_topology(MemoryRegion *mr)
 {
@@ -712,7 +724,9 @@ static FlatView *generate_memory_topology(MemoryRegion *mr)
                              addrrange_make(int128_zero(), int128_2_64()),
                              false, false);
     }
-    flatview_simplify(view);
+    if (!skip_simplify()) {
+        flatview_simplify(view);
+    }
 
     view->dispatch = address_space_dispatch_new(view);
     for (i = 0; i < view->nr; i++) {
