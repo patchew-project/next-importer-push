@@ -79,4 +79,7 @@ void colo_flush_ram_cache(void);
 void colo_release_ram_cache(void);
 void colo_incoming_start_dirty_log(void);
 
+void colo_enable_ram_bulk_stage(void);
+void colo_disable_ram_bulk_stage(void);
+
 #endif

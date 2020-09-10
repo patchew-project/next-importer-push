@@ -3348,6 +3348,16 @@ static bool postcopy_is_running(void)
     return ps >= POSTCOPY_INCOMING_LISTENING && ps < POSTCOPY_INCOMING_END;
 }
 
+void colo_enable_ram_bulk_stage(void)
+{
+    ram_state->ram_bulk_stage = true;
+}
+
+void colo_disable_ram_bulk_stage(void)
+{
+    ram_state->ram_bulk_stage = false;
+}
+
 /*
  * Flush content of RAM cache into SVM's memory.
  * Only flush the pages that be dirtied by PVM or SVM or both.

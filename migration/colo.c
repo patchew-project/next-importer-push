@@ -844,6 +844,8 @@ void *colo_process_incoming_thread(void *opaque)
         return NULL;
     }
 
+    colo_disable_ram_bulk_stage();
+
     failover_init_state();
 
     mis->to_src_file = qemu_file_get_return_path(mis->from_src_file);
@@ -873,7 +875,7 @@ void *colo_process_incoming_thread(void *opaque)
         goto out;
     }
 #else
-        abort();
+    abort();
 #endif
     vm_start();
     trace_colo_vm_state_change("stop", "run");
@@ -923,6 +925,8 @@ out:
     if (fb) {
         qemu_fclose(fb);
     }
+
+    colo_enable_ram_bulk_stage();
 
     /* Hope this not to be too long to loop here */
     qemu_sem_wait(&mis->colo_incoming_sem);
