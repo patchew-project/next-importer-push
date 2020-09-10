@@ -42,19 +42,19 @@ struct RingBufChardev {
 };
 typedef struct RingBufChardev RingBufChardev;
 
-DECLARE_INSTANCE_CHECKER(RingBufChardev, RINGBUF_CHARDEV,
+DECLARE_INSTANCE_CHECKER(RingBufChardev, CHARDEV_RINGBUF,
                          TYPE_CHARDEV_RINGBUF)
 
 static size_t ringbuf_count(const Chardev *chr)
 {
-    const RingBufChardev *d = RINGBUF_CHARDEV(chr);
+    const RingBufChardev *d = CHARDEV_RINGBUF(chr);
 
     return d->prod - d->cons;
 }
 
 static int ringbuf_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    RingBufChardev *d = RINGBUF_CHARDEV(chr);
+    RingBufChardev *d = CHARDEV_RINGBUF(chr);
     int i;
 
     if (!buf || (len < 0)) {
@@ -73,7 +73,7 @@ static int ringbuf_chr_write(Chardev *chr, const uint8_t *buf, int len)
 
 static int ringbuf_chr_read(Chardev *chr, uint8_t *buf, int len)
 {
-    RingBufChardev *d = RINGBUF_CHARDEV(chr);
+    RingBufChardev *d = CHARDEV_RINGBUF(chr);
     int i;
 
     qemu_mutex_lock(&chr->chr_write_lock);
@@ -87,7 +87,7 @@ static int ringbuf_chr_read(Chardev *chr, uint8_t *buf, int len)
 
 static void char_ringbuf_finalize(Object *obj)
 {
-    RingBufChardev *d = RINGBUF_CHARDEV(obj);
+    RingBufChardev *d = CHARDEV_RINGBUF(obj);
 
     g_free(d->cbuf);
 }
@@ -98,7 +98,7 @@ static void qemu_chr_open_ringbuf(Chardev *chr,
                                   Error **errp)
 {
     ChardevRingbuf *opts = backend->u.ringbuf.data;
-    RingBufChardev *d = RINGBUF_CHARDEV(chr);
+    RingBufChardev *d = CHARDEV_RINGBUF(chr);
 
     d->size = opts->has_size ? opts->size : 65536;
 
