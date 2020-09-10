@@ -45,13 +45,13 @@ struct UdpChardev {
 };
 typedef struct UdpChardev UdpChardev;
 
-DECLARE_INSTANCE_CHECKER(UdpChardev, UDP_CHARDEV,
+DECLARE_INSTANCE_CHECKER(UdpChardev, CHARDEV_UDP,
                          TYPE_CHARDEV_UDP)
 
 /* Called with chr_write_lock held.  */
 static int udp_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    UdpChardev *s = UDP_CHARDEV(chr);
+    UdpChardev *s = CHARDEV_UDP(chr);
 
     return qio_channel_write(
         s->ioc, (const char *)buf, len, NULL);
@@ -72,7 +72,7 @@ static void udp_chr_flush_buffer(UdpChardev *s)
 static int udp_chr_read_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    UdpChardev *s = UDP_CHARDEV(opaque);
+    UdpChardev *s = CHARDEV_UDP(opaque);
 
     s->max_size = qemu_chr_be_can_write(chr);
 
@@ -87,7 +87,7 @@ static int udp_chr_read_poll(void *opaque)
 static gboolean udp_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    UdpChardev *s = UDP_CHARDEV(opaque);
+    UdpChardev *s = CHARDEV_UDP(opaque);
     ssize_t ret;
 
     if (s->max_size == 0) {
@@ -108,7 +108,7 @@ static gboolean udp_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 
 static void udp_chr_update_read_handler(Chardev *chr)
 {
-    UdpChardev *s = UDP_CHARDEV(chr);
+    UdpChardev *s = CHARDEV_UDP(chr);
 
     remove_fd_in_watch(chr);
     if (s->ioc) {
@@ -122,7 +122,7 @@ static void udp_chr_update_read_handler(Chardev *chr)
 static void char_udp_finalize(Object *obj)
 {
     Chardev *chr = CHARDEV(obj);
-    UdpChardev *s = UDP_CHARDEV(obj);
+    UdpChardev *s = CHARDEV_UDP(obj);
 
     remove_fd_in_watch(chr);
     if (s->ioc) {
@@ -200,7 +200,7 @@ static void qmp_chardev_open_udp(Chardev *chr,
     SocketAddress *remote_addr = socket_address_flatten(udp->remote);
     QIOChannelSocket *sioc = qio_channel_socket_new();
     char *name;
-    UdpChardev *s = UDP_CHARDEV(chr);
+    UdpChardev *s = CHARDEV_UDP(chr);
     int ret;
 
     ret = qio_channel_socket_dgram_sync(sioc, local_addr, remote_addr, errp);
