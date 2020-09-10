@@ -48,8 +48,8 @@
 #include "chardev/char-parallel.h"
 
 typedef struct ParallelChardev ParallelChardev;
-#define PARALLEL_CHARDEV(obj) \
-    OBJECT_CHECK(ParallelChardev, (obj), TYPE_CHARDEV_PARALLEL)
+DECLARE_INSTANCE_CHECKER(ParallelChardev, PARALLEL_CHARDEV,
+                         TYPE_CHARDEV_PARALLEL)
 
 #if defined(__linux__)
 
