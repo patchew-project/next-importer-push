@@ -40,7 +40,7 @@ struct TestdevChardev {
 typedef struct TestdevChardev TestdevChardev;
 
 #define TYPE_CHARDEV_TESTDEV "chardev-testdev"
-DECLARE_INSTANCE_CHECKER(TestdevChardev, TESTDEV_CHARDEV,
+DECLARE_INSTANCE_CHECKER(TestdevChardev, CHARDEV_TESTDEV,
                          TYPE_CHARDEV_TESTDEV)
 
 /* Try to interpret a whole incoming packet */
@@ -87,7 +87,7 @@ static int testdev_eat_packet(TestdevChardev *testdev)
 /* The other end is writing some data.  Store it and try to interpret */
 static int testdev_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    TestdevChardev *testdev = TESTDEV_CHARDEV(chr);
+    TestdevChardev *testdev = CHARDEV_TESTDEV(chr);
     int tocopy, eaten, orig_len = len;
 
     while (len) {
