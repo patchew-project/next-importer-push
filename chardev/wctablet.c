@@ -86,7 +86,7 @@ struct TabletChardev {
 typedef struct TabletChardev TabletChardev;
 
 #define TYPE_CHARDEV_WCTABLET "chardev-wctablet"
-DECLARE_INSTANCE_CHECKER(TabletChardev, WCTABLET_CHARDEV,
+DECLARE_INSTANCE_CHECKER(TabletChardev, CHARDEV_WCTABLET,
                          TYPE_CHARDEV_WCTABLET)
 
 
@@ -187,7 +187,7 @@ static QemuInputHandler wctablet_handler = {
 
 static void wctablet_chr_accept_input(Chardev *chr)
 {
-    TabletChardev *tablet = WCTABLET_CHARDEV(chr);
+    TabletChardev *tablet = CHARDEV_WCTABLET(chr);
     int len, canWrite;
 
     canWrite = qemu_chr_be_can_write(chr);
@@ -208,7 +208,7 @@ static void wctablet_chr_accept_input(Chardev *chr)
 static int wctablet_chr_write(struct Chardev *chr,
                               const uint8_t *buf, int len)
 {
-    TabletChardev *tablet = WCTABLET_CHARDEV(chr);
+    TabletChardev *tablet = CHARDEV_WCTABLET(chr);
     unsigned int i, clen;
     char *pos;
 
@@ -297,7 +297,7 @@ static int wctablet_chr_write(struct Chardev *chr,
 
 static int wctablet_chr_ioctl(Chardev *chr, int cmd, void *arg)
 {
-    TabletChardev *tablet = WCTABLET_CHARDEV(chr);
+    TabletChardev *tablet = CHARDEV_WCTABLET(chr);
     QEMUSerialSetParams *ssp;
 
     switch (cmd) {
@@ -317,7 +317,7 @@ static int wctablet_chr_ioctl(Chardev *chr, int cmd, void *arg)
 
 static void wctablet_chr_finalize(Object *obj)
 {
-    TabletChardev *tablet = WCTABLET_CHARDEV(obj);
+    TabletChardev *tablet = CHARDEV_WCTABLET(obj);
 
     qemu_input_handler_unregister(tablet->hs);
     g_free(tablet);
@@ -328,7 +328,7 @@ static void wctablet_chr_open(Chardev *chr,
                               bool *be_opened,
                               Error **errp)
 {
-    TabletChardev *tablet = WCTABLET_CHARDEV(chr);
+    TabletChardev *tablet = CHARDEV_WCTABLET(chr);
 
     *be_opened = true;
 
