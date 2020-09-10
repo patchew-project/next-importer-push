@@ -47,16 +47,17 @@
 #include "chardev/char-fd.h"
 #include "chardev/char-parallel.h"
 
+typedef struct ParallelChardev ParallelChardev;
 #define PARALLEL_CHARDEV(obj) \
     OBJECT_CHECK(ParallelChardev, (obj), TYPE_CHARDEV_PARALLEL)
 
 #if defined(__linux__)
 
-typedef struct {
+struct ParallelChardev {
     Chardev parent;
     int fd;
     int mode;
-} ParallelChardev;
+};
 
 static int pp_hw_mode(ParallelChardev *s, uint16_t mode)
 {
@@ -177,10 +178,10 @@ static void qemu_chr_open_pp_fd(Chardev *chr,
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 
-typedef struct {
+struct ParallelChardev {
     Chardev parent;
     int fd;
-} ParallelChardev;
+};
 
 static int pp_ioctl(Chardev *chr, int cmd, void *arg)
 {
