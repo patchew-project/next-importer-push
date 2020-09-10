@@ -88,7 +88,7 @@ struct SocketChardev {
 };
 typedef struct SocketChardev SocketChardev;
 
-DECLARE_INSTANCE_CHECKER(SocketChardev, SOCKET_CHARDEV,
+DECLARE_INSTANCE_CHECKER(SocketChardev, CHARDEV_SOCKET,
                          TYPE_CHARDEV_SOCKET)
 
 static gboolean socket_reconnect_timeout(gpointer opaque);
@@ -120,7 +120,7 @@ static void tcp_chr_reconn_timer_cancel(SocketChardev *s)
 
 static void qemu_chr_socket_restart_timer(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     char *name;
 
     assert(s->state == TCP_CHARDEV_STATE_DISCONNECTED);
@@ -137,7 +137,7 @@ static void qemu_chr_socket_restart_timer(Chardev *chr)
 static void check_report_connect_error(Chardev *chr,
                                        Error *err)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (!s->connect_err_reported) {
         error_reportf_err(err,
@@ -160,7 +160,7 @@ static void tcp_chr_disconnect_locked(Chardev *chr);
 /* Called with chr_write_lock held.  */
 static int tcp_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (s->state == TCP_CHARDEV_STATE_CONNECTED) {
         int ret =  io_channel_send_full(s->ioc, buf, len,
@@ -195,7 +195,7 @@ static int tcp_chr_write(Chardev *chr, const uint8_t *buf, int len)
 static int tcp_chr_read_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(opaque);
+    SocketChardev *s = CHARDEV_SOCKET(opaque);
     if (s->state != TCP_CHARDEV_STATE_CONNECTED) {
         return 0;
     }
@@ -276,7 +276,7 @@ static void tcp_chr_process_IAC_bytes(Chardev *chr,
 
 static int tcp_get_msgfds(Chardev *chr, int *fds, int num)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     int to_copy = (s->read_msgfds_num < num) ? s->read_msgfds_num : num;
 
@@ -302,7 +302,7 @@ static int tcp_get_msgfds(Chardev *chr, int *fds, int num)
 
 static int tcp_set_msgfds(Chardev *chr, int *fds, int num)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     /* clear old pending fd array */
     g_free(s->write_msgfds);
@@ -327,7 +327,7 @@ static int tcp_set_msgfds(Chardev *chr, int *fds, int num)
 
 static ssize_t tcp_chr_recv(Chardev *chr, char *buf, size_t len)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     struct iovec iov = { .iov_base = buf, .iov_len = len };
     int ret;
     size_t i;
@@ -384,7 +384,7 @@ static ssize_t tcp_chr_recv(Chardev *chr, char *buf, size_t len)
 
 static GSource *tcp_chr_add_watch(Chardev *chr, GIOCondition cond)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     return qio_channel_create_watch(s->ioc, cond);
 }
 
@@ -399,7 +399,7 @@ static void remove_hup_source(SocketChardev *s)
 
 static void tcp_chr_free_connection(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     int i;
 
     if (s->read_msgfds_num) {
@@ -479,7 +479,7 @@ static void update_disconnected_filename(SocketChardev *s)
  */
 static void tcp_chr_disconnect_locked(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     bool emit_close = s->state == TCP_CHARDEV_STATE_CONNECTED;
 
     tcp_chr_free_connection(chr);
@@ -507,7 +507,7 @@ static void tcp_chr_disconnect(Chardev *chr)
 static gboolean tcp_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(opaque);
+    SocketChardev *s = CHARDEV_SOCKET(opaque);
     uint8_t buf[CHR_READ_BUF_LEN];
     int len, size;
 
@@ -546,7 +546,7 @@ static gboolean tcp_chr_hup(QIOChannel *channel,
 
 static int tcp_chr_sync_read(Chardev *chr, const uint8_t *buf, int len)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     int size;
 
     if (s->state != TCP_CHARDEV_STATE_CONNECTED) {
@@ -627,7 +627,7 @@ static void update_ioc_handlers(SocketChardev *s)
 static void tcp_chr_connect(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(opaque);
+    SocketChardev *s = CHARDEV_SOCKET(opaque);
 
     g_free(chr->filename);
     chr->filename = qemu_chr_compute_filename(s);
@@ -648,7 +648,7 @@ static void tcp_chr_telnet_destroy(SocketChardev *s)
 
 static void tcp_chr_update_read_handler(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (s->listener && s->state == TCP_CHARDEV_STATE_DISCONNECTED) {
         /*
@@ -708,7 +708,7 @@ end:
 
 static void tcp_chr_telnet_init(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     TCPChardevTelnetInit *init;
     size_t n = 0;
 
@@ -779,7 +779,7 @@ static void tcp_chr_websock_handshake(QIOTask *task, gpointer user_data)
 
 static void tcp_chr_websock_init(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     QIOChannelWebsock *wioc = NULL;
     gchar *name;
 
@@ -817,7 +817,7 @@ static void tcp_chr_tls_handshake(QIOTask *task,
 
 static void tcp_chr_tls_init(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     QIOChannelTLS *tioc;
     gchar *name;
 
@@ -855,7 +855,7 @@ static void tcp_chr_tls_init(Chardev *chr)
 static void tcp_chr_set_client_ioc_name(Chardev *chr,
                                         QIOChannelSocket *sioc)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     char *name;
     name = g_strdup_printf("chardev-tcp-%s-%s",
                            s->is_listen ? "server" : "client",
@@ -867,7 +867,7 @@ static void tcp_chr_set_client_ioc_name(Chardev *chr,
 
 static int tcp_chr_new_client(Chardev *chr, QIOChannelSocket *sioc)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (s->state != TCP_CHARDEV_STATE_CONNECTING) {
         return -1;
@@ -906,7 +906,7 @@ static int tcp_chr_add_client(Chardev *chr, int fd)
 {
     int ret;
     QIOChannelSocket *sioc;
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (s->state != TCP_CHARDEV_STATE_DISCONNECTED) {
         return -1;
@@ -928,7 +928,7 @@ static void tcp_chr_accept(QIONetListener *listener,
                            void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     tcp_chr_change_state(s, TCP_CHARDEV_STATE_CONNECTING);
     tcp_chr_set_client_ioc_name(chr, cioc);
@@ -938,7 +938,7 @@ static void tcp_chr_accept(QIONetListener *listener,
 
 static int tcp_chr_connect_client_sync(Chardev *chr, Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     QIOChannelSocket *sioc = qio_channel_socket_new();
     tcp_chr_change_state(s, TCP_CHARDEV_STATE_CONNECTING);
     tcp_chr_set_client_ioc_name(chr, sioc);
@@ -955,7 +955,7 @@ static int tcp_chr_connect_client_sync(Chardev *chr, Error **errp)
 
 static void tcp_chr_accept_server_sync(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     QIOChannelSocket *sioc;
     info_report("QEMU waiting for connection on: %s",
                 chr->filename);
@@ -969,7 +969,7 @@ static void tcp_chr_accept_server_sync(Chardev *chr)
 
 static int tcp_chr_wait_connected(Chardev *chr, Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     const char *opts[] = { "telnet", "tn3270", "websock", "tls-creds" };
     bool optset[] = { s->is_telnet, s->is_tn3270, s->is_websock, s->tls_creds };
     size_t i;
@@ -1056,7 +1056,7 @@ static int tcp_chr_wait_connected(Chardev *chr, Error **errp)
 static void char_socket_finalize(Object *obj)
 {
     Chardev *chr = CHARDEV(obj);
-    SocketChardev *s = SOCKET_CHARDEV(obj);
+    SocketChardev *s = CHARDEV_SOCKET(obj);
 
     tcp_chr_free_connection(chr);
     tcp_chr_reconn_timer_cancel(s);
@@ -1080,7 +1080,7 @@ static void qemu_chr_socket_connected(QIOTask *task, void *opaque)
 {
     QIOChannelSocket *sioc = QIO_CHANNEL_SOCKET(qio_task_get_source(task));
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     Error *err = NULL;
 
     s->connect_task = NULL;
@@ -1114,7 +1114,7 @@ static void tcp_chr_connect_client_task(QIOTask *task,
 
 static void tcp_chr_connect_client_async(Chardev *chr)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     QIOChannelSocket *sioc;
 
     tcp_chr_change_state(s, TCP_CHARDEV_STATE_CONNECTING);
@@ -1143,7 +1143,7 @@ static void tcp_chr_connect_client_async(Chardev *chr)
 static gboolean socket_reconnect_timeout(gpointer opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    SocketChardev *s = SOCKET_CHARDEV(opaque);
+    SocketChardev *s = CHARDEV_SOCKET(opaque);
 
     qemu_mutex_lock(&chr->chr_write_lock);
     g_source_unref(s->reconnect_timer);
@@ -1165,7 +1165,7 @@ static int qmp_chardev_open_socket_server(Chardev *chr,
                                           bool is_waitconnect,
                                           Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     char *name;
     if (is_telnet) {
         s->do_telnetopt = 1;
@@ -1203,7 +1203,7 @@ static int qmp_chardev_open_socket_client(Chardev *chr,
                                           int64_t reconnect,
                                           Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
 
     if (reconnect > 0) {
         s->reconnect_time = reconnect;
@@ -1300,7 +1300,7 @@ static void qmp_chardev_open_socket(Chardev *chr,
                                     bool *be_opened,
                                     Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(chr);
+    SocketChardev *s = CHARDEV_SOCKET(chr);
     ChardevSocket *sock = backend->u.socket.data;
     bool do_nodelay     = sock->has_nodelay ? sock->nodelay : false;
     bool is_listen      = sock->has_server  ? sock->server  : true;
@@ -1468,7 +1468,7 @@ static void
 char_socket_get_addr(Object *obj, Visitor *v, const char *name,
                      void *opaque, Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(obj);
+    SocketChardev *s = CHARDEV_SOCKET(obj);
 
     visit_type_SocketAddress(v, name, &s->addr, errp);
 }
@@ -1476,7 +1476,7 @@ char_socket_get_addr(Object *obj, Visitor *v, const char *name,
 static bool
 char_socket_get_connected(Object *obj, Error **errp)
 {
-    SocketChardev *s = SOCKET_CHARDEV(obj);
+    SocketChardev *s = CHARDEV_SOCKET(obj);
 
     return s->state == TCP_CHARDEV_STATE_CONNECTED;
 }
