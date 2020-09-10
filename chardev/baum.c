@@ -105,7 +105,7 @@ struct BaumChardev {
 typedef struct BaumChardev BaumChardev;
 
 #define TYPE_CHARDEV_BRAILLE "chardev-braille"
-DECLARE_INSTANCE_CHECKER(BaumChardev, BAUM_CHARDEV,
+DECLARE_INSTANCE_CHECKER(BaumChardev, CHARDEV_BRAILLE,
                          TYPE_CHARDEV_BRAILLE)
 
 /* Let's assume NABCC by default */
@@ -269,7 +269,7 @@ static int baum_deferred_init(BaumChardev *baum)
 /* The serial port can receive more of our data */
 static void baum_chr_accept_input(struct Chardev *chr)
 {
-    BaumChardev *baum = BAUM_CHARDEV(chr);
+    BaumChardev *baum = CHARDEV_BRAILLE(chr);
     int room, first;
 
     if (!baum->out_buf_used)
@@ -336,7 +336,7 @@ static void baum_write_packet(BaumChardev *baum, const uint8_t *buf, int len)
 /* Called when the other end seems to have a wrong idea of our display size */
 static void baum_cellCount_timer_cb(void *opaque)
 {
-    BaumChardev *baum = BAUM_CHARDEV(opaque);
+    BaumChardev *baum = CHARDEV_BRAILLE(opaque);
     uint8_t cell_count[] = { BAUM_RSP_CellCount, baum->x * baum->y };
     DPRINTF("Timeout waiting for DisplayData, sending cell count\n");
     baum_write_packet(baum, cell_count, sizeof(cell_count));
@@ -486,7 +486,7 @@ static int baum_eat_packet(BaumChardev *baum, const uint8_t *buf, int len)
 /* The other end is writing some data.  Store it and try to interpret */
 static int baum_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    BaumChardev *baum = BAUM_CHARDEV(chr);
+    BaumChardev *baum = CHARDEV_BRAILLE(chr);
     int tocopy, cur, eaten, orig_len = len;
 
     if (!len)
@@ -543,7 +543,7 @@ static void baum_send_key2(BaumChardev *baum, uint8_t type, uint8_t value,
 /* We got some data on the BrlAPI socket */
 static void baum_chr_read(void *opaque)
 {
-    BaumChardev *baum = BAUM_CHARDEV(opaque);
+    BaumChardev *baum = CHARDEV_BRAILLE(opaque);
     brlapi_keyCode_t code;
     int ret;
     if (!baum->brlapi)
@@ -629,7 +629,7 @@ static void baum_chr_read(void *opaque)
 
 static void char_braille_finalize(Object *obj)
 {
-    BaumChardev *baum = BAUM_CHARDEV(obj);
+    BaumChardev *baum = CHARDEV_BRAILLE(obj);
 
     timer_free(baum->cellCount_timer);
     if (baum->brlapi) {
@@ -643,7 +643,7 @@ static void baum_chr_open(Chardev *chr,
                           bool *be_opened,
                           Error **errp)
 {
-    BaumChardev *baum = BAUM_CHARDEV(chr);
+    BaumChardev *baum = CHARDEV_BRAILLE(chr);
     brlapi_handle_t *handle;
 
     handle = g_malloc0(brlapi_getHandleSize());
