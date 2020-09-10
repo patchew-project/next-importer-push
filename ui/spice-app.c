@@ -47,7 +47,7 @@ struct VCChardev {
 typedef struct VCChardev VCChardev;
 
 #define TYPE_CHARDEV_VC "chardev-vc"
-DECLARE_INSTANCE_CHECKER(VCChardev, VC_CHARDEV,
+DECLARE_INSTANCE_CHECKER(VCChardev, CHARDEV_VC,
                          TYPE_CHARDEV_VC)
 
 static ChardevBackend *

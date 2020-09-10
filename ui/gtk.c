@@ -179,7 +179,7 @@ struct VCChardev {
 typedef struct VCChardev VCChardev;
 
 #define TYPE_CHARDEV_VC "chardev-vc"
-DECLARE_INSTANCE_CHECKER(VCChardev, VC_CHARDEV,
+DECLARE_INSTANCE_CHECKER(VCChardev, CHARDEV_VC,
                          TYPE_CHARDEV_VC)
 
 bool gtk_use_gl_area;
@@ -1693,7 +1693,7 @@ static void gd_vc_adjustment_changed(GtkAdjustment *adjustment, void *opaque)
 
 static int gd_vc_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    VCChardev *vcd = VC_CHARDEV(chr);
+    VCChardev *vcd = CHARDEV_VC(chr);
     VirtualConsole *vc = vcd->console;
 
     vte_terminal_feed(VTE_TERMINAL(vc->vte.terminal), (const char *)buf, len);
@@ -1702,7 +1702,7 @@ static int gd_vc_chr_write(Chardev *chr, const uint8_t *buf, int len)
 
 static void gd_vc_chr_set_echo(Chardev *chr, bool echo)
 {
-    VCChardev *vcd = VC_CHARDEV(chr);
+    VCChardev *vcd = CHARDEV_VC(chr);
     VirtualConsole *vc = vcd->console;
 
     if (vc) {
@@ -1784,7 +1784,7 @@ static GSList *gd_vc_vte_init(GtkDisplayState *s, VirtualConsole *vc,
     GtkWidget *box;
     GtkWidget *scrollbar;
     GtkAdjustment *vadjustment;
-    VCChardev *vcd = VC_CHARDEV(chr);
+    VCChardev *vcd = CHARDEV_VC(chr);
 
     vc->s = s;
     vc->vte.echo = vcd->echo;

@@ -1090,12 +1090,12 @@ struct VCChardev {
 typedef struct VCChardev VCChardev;
 
 #define TYPE_CHARDEV_VC "chardev-vc"
-DECLARE_INSTANCE_CHECKER(VCChardev, VC_CHARDEV,
+DECLARE_INSTANCE_CHECKER(VCChardev, CHARDEV_VC,
                          TYPE_CHARDEV_VC)
 
 static int vc_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    VCChardev *drv = VC_CHARDEV(chr);
+    VCChardev *drv = CHARDEV_VC(chr);
     QemuConsole *s = drv->console;
     int i;
 
@@ -2115,7 +2115,7 @@ int qemu_console_get_height(QemuConsole *con, int fallback)
 
 static void vc_chr_set_echo(Chardev *chr, bool echo)
 {
-    VCChardev *drv = VC_CHARDEV(chr);
+    VCChardev *drv = CHARDEV_VC(chr);
     QemuConsole *s = drv->console;
 
     s->echo = echo;
@@ -2155,7 +2155,7 @@ static const GraphicHwOps text_console_ops = {
 
 static void text_console_do_init(Chardev *chr, DisplayState *ds)
 {
-    VCChardev *drv = VC_CHARDEV(chr);
+    VCChardev *drv = CHARDEV_VC(chr);
     QemuConsole *s = drv->console;
     int g_width = 80 * FONT_WIDTH;
     int g_height = 24 * FONT_HEIGHT;
@@ -2212,7 +2212,7 @@ static void vc_chr_open(Chardev *chr,
                         Error **errp)
 {
     ChardevVC *vc = backend->u.vc.data;
-    VCChardev *drv = VC_CHARDEV(chr);
+    VCChardev *drv = CHARDEV_VC(chr);
     QemuConsole *s;
     unsigned width = 0;
     unsigned height = 0;
