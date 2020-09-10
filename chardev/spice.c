@@ -173,7 +173,7 @@ static GSourceFuncs SpiceCharSourceFuncs = {
 
 static GSource *spice_chr_add_watch(Chardev *chr, GIOCondition cond)
 {
-    SpiceChardev *scd = SPICE_CHARDEV(chr);
+    SpiceChardev *scd = CHARDEV_SPICE(chr);
     SpiceCharSource *src;
 
     assert(cond & G_IO_OUT);
@@ -187,7 +187,7 @@ static GSource *spice_chr_add_watch(Chardev *chr, GIOCondition cond)
 
 static int spice_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    SpiceChardev *s = SPICE_CHARDEV(chr);
+    SpiceChardev *s = CHARDEV_SPICE(chr);
     int read_bytes;
 
     assert(s->datalen == 0);
@@ -212,7 +212,7 @@ static int spice_chr_write(Chardev *chr, const uint8_t *buf, int len)
 
 static void char_spice_finalize(Object *obj)
 {
-    SpiceChardev *s = SPICE_CHARDEV(obj);
+    SpiceChardev *s = CHARDEV_SPICE(obj);
 
     vmc_unregister_interface(s);
 
@@ -224,7 +224,7 @@ static void char_spice_finalize(Object *obj)
 
 static void spice_vmc_set_fe_open(struct Chardev *chr, int fe_open)
 {
-    SpiceChardev *s = SPICE_CHARDEV(chr);
+    SpiceChardev *s = CHARDEV_SPICE(chr);
     if (fe_open) {
         vmc_register_interface(s);
     } else {
@@ -234,7 +234,7 @@ static void spice_vmc_set_fe_open(struct Chardev *chr, int fe_open)
 
 static void spice_port_set_fe_open(struct Chardev *chr, int fe_open)
 {
-    SpiceChardev *s = SPICE_CHARDEV(chr);
+    SpiceChardev *s = CHARDEV_SPICE(chr);
 
     if (fe_open) {
         spice_server_port_event(&s->sin, SPICE_PORT_EVENT_OPENED);
@@ -245,14 +245,14 @@ static void spice_port_set_fe_open(struct Chardev *chr, int fe_open)
 
 static void spice_chr_accept_input(struct Chardev *chr)
 {
-    SpiceChardev *s = SPICE_CHARDEV(chr);
+    SpiceChardev *s = CHARDEV_SPICE(chr);
 
     spice_server_char_device_wakeup(&s->sin);
 }
 
 static void chr_open(Chardev *chr, const char *subtype)
 {
-    SpiceChardev *s = SPICE_CHARDEV(chr);
+    SpiceChardev *s = CHARDEV_SPICE(chr);
 
     s->active = false;
     s->sin.subtype = g_strdup(subtype);
@@ -313,7 +313,7 @@ void qemu_chr_open_spice_port(Chardev *chr,
     chr_open(chr, "port");
 
     *be_opened = false;
-    s = SPICE_CHARDEV(chr);
+    s = CHARDEV_SPICE(chr);
     s->sin.portname = g_strdup(name);
 
     if (using_spice) {
