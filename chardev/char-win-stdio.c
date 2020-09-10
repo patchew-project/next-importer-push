@@ -40,13 +40,13 @@ struct WinStdioChardev {
 };
 typedef struct WinStdioChardev WinStdioChardev;
 
-DECLARE_INSTANCE_CHECKER(WinStdioChardev, WIN_STDIO_CHARDEV,
+DECLARE_INSTANCE_CHECKER(WinStdioChardev, CHARDEV_WIN_STDIO,
                          TYPE_CHARDEV_WIN_STDIO)
 
 static void win_stdio_wait_func(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(opaque);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(opaque);
     INPUT_RECORD       buf[4];
     int                ret;
     DWORD              dwSize;
@@ -79,7 +79,7 @@ static void win_stdio_wait_func(void *opaque)
 
 static DWORD WINAPI win_stdio_thread(LPVOID param)
 {
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(param);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(param);
     int                ret;
     DWORD              dwSize;
 
@@ -118,7 +118,7 @@ static DWORD WINAPI win_stdio_thread(LPVOID param)
 static void win_stdio_thread_wait_func(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(opaque);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(opaque);
 
     if (qemu_chr_be_can_write(chr)) {
         qemu_chr_be_write(chr, &stdio->win_stdio_buf, 1);
@@ -129,7 +129,7 @@ static void win_stdio_thread_wait_func(void *opaque)
 
 static void qemu_chr_set_echo_win_stdio(Chardev *chr, bool echo)
 {
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(chr);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(chr);
     DWORD              dwMode = 0;
 
     GetConsoleMode(stdio->hStdIn, &dwMode);
@@ -146,7 +146,7 @@ static void qemu_chr_open_stdio(Chardev *chr,
                                 bool *be_opened,
                                 Error **errp)
 {
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(chr);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(chr);
     DWORD              dwMode;
     int                is_console = 0;
 
@@ -213,7 +213,7 @@ err1:
 
 static void char_win_stdio_finalize(Object *obj)
 {
-    WinStdioChardev *stdio = WIN_STDIO_CHARDEV(obj);
+    WinStdioChardev *stdio = CHARDEV_WIN_STDIO(obj);
 
     if (stdio->hInputReadyEvent != INVALID_HANDLE_VALUE) {
         CloseHandle(stdio->hInputReadyEvent);
