@@ -45,12 +45,12 @@ struct MouseChardev {
 typedef struct MouseChardev MouseChardev;
 
 #define TYPE_CHARDEV_MSMOUSE "chardev-msmouse"
-DECLARE_INSTANCE_CHECKER(MouseChardev, MOUSE_CHARDEV,
+DECLARE_INSTANCE_CHECKER(MouseChardev, CHARDEV_MSMOUSE,
                          TYPE_CHARDEV_MSMOUSE)
 
 static void msmouse_chr_accept_input(Chardev *chr)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(chr);
+    MouseChardev *mouse = CHARDEV_MSMOUSE(chr);
     int len;
 
     len = qemu_chr_be_can_write(chr);
@@ -105,7 +105,7 @@ static void msmouse_queue_event(MouseChardev *mouse)
 static void msmouse_input_event(DeviceState *dev, QemuConsole *src,
                                 InputEvent *evt)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(dev);
+    MouseChardev *mouse = CHARDEV_MSMOUSE(dev);
     InputMoveEvent *move;
     InputBtnEvent *btn;
 
@@ -129,7 +129,7 @@ static void msmouse_input_event(DeviceState *dev, QemuConsole *src,
 
 static void msmouse_input_sync(DeviceState *dev)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(dev);
+    MouseChardev *mouse = CHARDEV_MSMOUSE(dev);
     Chardev *chr = CHARDEV(dev);
 
     msmouse_queue_event(mouse);
@@ -144,7 +144,7 @@ static int msmouse_chr_write(struct Chardev *s, const uint8_t *buf, int len)
 
 static void char_msmouse_finalize(Object *obj)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(obj);
+    MouseChardev *mouse = CHARDEV_MSMOUSE(obj);
 
     qemu_input_handler_unregister(mouse->hs);
 }
@@ -161,7 +161,7 @@ static void msmouse_chr_open(Chardev *chr,
                              bool *be_opened,
                              Error **errp)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(chr);
+    MouseChardev *mouse = CHARDEV_MSMOUSE(chr);
 
     *be_opened = false;
     mouse->hs = qemu_input_handler_register((DeviceState *)mouse,
