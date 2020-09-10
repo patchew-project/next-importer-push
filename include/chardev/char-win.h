@@ -44,7 +44,7 @@ typedef struct WinChardev WinChardev;
 #define NRECVBUF 2048
 
 #define TYPE_CHARDEV_WIN "chardev-win"
-DECLARE_INSTANCE_CHECKER(WinChardev, WIN_CHARDEV,
+DECLARE_INSTANCE_CHECKER(WinChardev, CHARDEV_WIN,
                          TYPE_CHARDEV_WIN)
 
 void win_chr_set_file(Chardev *chr, HANDLE file, bool keep_open);

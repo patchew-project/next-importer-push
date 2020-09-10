@@ -43,7 +43,7 @@
 static int win_chr_pipe_init(Chardev *chr, const char *filename,
                              Error **errp)
 {
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
     OVERLAPPED ov;
     int ret;
     DWORD size;

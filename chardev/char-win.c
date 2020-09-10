@@ -30,7 +30,7 @@
 
 static void win_chr_read(Chardev *chr, DWORD len)
 {
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
     int max_size = qemu_chr_be_can_write(chr);
     int ret, err;
     uint8_t buf[CHR_READ_BUF_LEN];
@@ -61,7 +61,7 @@ static void win_chr_read(Chardev *chr, DWORD len)
 static int win_chr_serial_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    WinChardev *s = WIN_CHARDEV(opaque);
+    WinChardev *s = CHARDEV_WIN(opaque);
     COMSTAT status;
     DWORD comerr;
 
@@ -75,7 +75,7 @@ static int win_chr_serial_poll(void *opaque)
 
 int win_chr_serial_init(Chardev *chr, const char *filename, Error **errp)
 {
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
     COMMCONFIG comcfg;
     COMMTIMEOUTS cto = { 0, 0, 0, 0, 0};
     COMSTAT comstat;
@@ -142,7 +142,7 @@ int win_chr_serial_init(Chardev *chr, const char *filename, Error **errp)
 int win_chr_pipe_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    WinChardev *s = WIN_CHARDEV(opaque);
+    WinChardev *s = CHARDEV_WIN(opaque);
     DWORD size;
 
     PeekNamedPipe(s->file, NULL, 0, NULL, &size, NULL);
@@ -156,7 +156,7 @@ int win_chr_pipe_poll(void *opaque)
 /* Called with chr_write_lock held.  */
 static int win_chr_write(Chardev *chr, const uint8_t *buf, int len1)
 {
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
     DWORD len, ret, size, err;
 
     len = len1;
@@ -192,7 +192,7 @@ static int win_chr_write(Chardev *chr, const uint8_t *buf, int len1)
 static void char_win_finalize(Object *obj)
 {
     Chardev *chr = CHARDEV(obj);
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
 
     if (s->hsend) {
         CloseHandle(s->hsend);
@@ -214,7 +214,7 @@ static void char_win_finalize(Object *obj)
 
 void win_chr_set_file(Chardev *chr, HANDLE file, bool keep_open)
 {
-    WinChardev *s = WIN_CHARDEV(chr);
+    WinChardev *s = CHARDEV_WIN(chr);
 
     s->keep_open = keep_open;
     s->file = file;
