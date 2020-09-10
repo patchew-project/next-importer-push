@@ -178,7 +178,7 @@ static void tty_serial_init(int fd, int speed,
 
 static int tty_serial_ioctl(Chardev *chr, int cmd, void *arg)
 {
-    FDChardev *s = FD_CHARDEV(chr);
+    FDChardev *s = CHARDEV_FD(chr);
     QIOChannelFile *fioc = QIO_CHANNEL_FILE(s->ioc_in);
 
     switch (cmd) {

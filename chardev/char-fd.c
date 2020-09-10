@@ -36,7 +36,7 @@
 /* Called with chr_write_lock held.  */
 static int fd_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    FDChardev *s = FD_CHARDEV(chr);
+    FDChardev *s = CHARDEV_FD(chr);
 
     return io_channel_send(s->ioc_out, buf, len);
 }
@@ -44,7 +44,7 @@ static int fd_chr_write(Chardev *chr, const uint8_t *buf, int len)
 static gboolean fd_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    FDChardev *s = FD_CHARDEV(opaque);
+    FDChardev *s = CHARDEV_FD(opaque);
     int len;
     uint8_t buf[CHR_READ_BUF_LEN];
     ssize_t ret;
@@ -74,7 +74,7 @@ static gboolean fd_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 static int fd_chr_read_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    FDChardev *s = FD_CHARDEV(opaque);
+    FDChardev *s = CHARDEV_FD(opaque);
 
     s->max_size = qemu_chr_be_can_write(chr);
     return s->max_size;
@@ -82,13 +82,13 @@ static int fd_chr_read_poll(void *opaque)
 
 static GSource *fd_chr_add_watch(Chardev *chr, GIOCondition cond)
 {
-    FDChardev *s = FD_CHARDEV(chr);
+    FDChardev *s = CHARDEV_FD(chr);
     return qio_channel_create_watch(s->ioc_out, cond);
 }
 
 static void fd_chr_update_read_handler(Chardev *chr)
 {
-    FDChardev *s = FD_CHARDEV(chr);
+    FDChardev *s = CHARDEV_FD(chr);
 
     remove_fd_in_watch(chr);
     if (s->ioc_in) {
@@ -102,7 +102,7 @@ static void fd_chr_update_read_handler(Chardev *chr)
 static void char_fd_finalize(Object *obj)
 {
     Chardev *chr = CHARDEV(obj);
-    FDChardev *s = FD_CHARDEV(obj);
+    FDChardev *s = CHARDEV_FD(obj);
 
     remove_fd_in_watch(chr);
     if (s->ioc_in) {
@@ -130,7 +130,7 @@ int qmp_chardev_open_file_source(char *src, int flags, Error **errp)
 void qemu_chr_open_fd(Chardev *chr,
                       int fd_in, int fd_out)
 {
-    FDChardev *s = FD_CHARDEV(chr);
+    FDChardev *s = CHARDEV_FD(chr);
     char *name;
 
     s->ioc_in = QIO_CHANNEL(qio_channel_file_new_fd(fd_in));
