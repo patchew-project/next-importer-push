@@ -48,7 +48,7 @@
 #include "chardev/char-parallel.h"
 
 typedef struct ParallelChardev ParallelChardev;
-DECLARE_INSTANCE_CHECKER(ParallelChardev, PARALLEL_CHARDEV,
+DECLARE_INSTANCE_CHECKER(ParallelChardev, CHARDEV_PARALLEL,
                          TYPE_CHARDEV_PARALLEL)
 
 #if defined(__linux__)
@@ -73,7 +73,7 @@ static int pp_hw_mode(ParallelChardev *s, uint16_t mode)
 
 static int pp_ioctl(Chardev *chr, int cmd, void *arg)
 {
-    ParallelChardev *drv = PARALLEL_CHARDEV(chr);
+    ParallelChardev *drv = CHARDEV_PARALLEL(chr);
     int fd = drv->fd;
     uint8_t b;
 
@@ -163,7 +163,7 @@ static void qemu_chr_open_pp_fd(Chardev *chr,
                                 bool *be_opened,
                                 Error **errp)
 {
-    ParallelChardev *drv = PARALLEL_CHARDEV(chr);
+    ParallelChardev *drv = CHARDEV_PARALLEL(chr);
 
     if (ioctl(fd, PPCLAIM) < 0) {
         error_setg_errno(errp, errno, "not a parallel port");
@@ -185,7 +185,7 @@ struct ParallelChardev {
 
 static int pp_ioctl(Chardev *chr, int cmd, void *arg)
 {
-    ParallelChardev *drv = PARALLEL_CHARDEV(chr);
+    ParallelChardev *drv = CHARDEV_PARALLEL(chr);
     uint8_t b;
 
     switch (cmd) {
@@ -230,7 +230,7 @@ static void qemu_chr_open_pp_fd(Chardev *chr,
                                 bool *be_opened,
                                 Error **errp)
 {
-    ParallelChardev *drv = PARALLEL_CHARDEV(chr);
+    ParallelChardev *drv = CHARDEV_PARALLEL(chr);
     drv->fd = fd;
     *be_opened = false;
 }
@@ -286,7 +286,7 @@ static void char_parallel_finalize(Object *obj)
 {
 #if defined(__linux__)
     Chardev *chr = CHARDEV(obj);
-    ParallelChardev *drv = PARALLEL_CHARDEV(chr);
+    ParallelChardev *drv = CHARDEV_PARALLEL(chr);
     int fd = drv->fd;
 
     pp_hw_mode(drv, IEEE1284_MODE_COMPAT);
