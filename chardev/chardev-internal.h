@@ -54,7 +54,7 @@ struct MuxChardev {
 };
 typedef struct MuxChardev MuxChardev;
 
-DECLARE_INSTANCE_CHECKER(MuxChardev, MUX_CHARDEV,
+DECLARE_INSTANCE_CHECKER(MuxChardev, CHARDEV_MUX,
                          TYPE_CHARDEV_MUX)
 #define CHARDEV_IS_MUX(chr)                             \
     object_dynamic_cast(OBJECT(chr), TYPE_CHARDEV_MUX)

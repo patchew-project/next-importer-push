@@ -308,7 +308,7 @@ static const TypeInfo char_type_info = {
 static bool qemu_chr_is_busy(Chardev *s)
 {
     if (CHARDEV_IS_MUX(s)) {
-        MuxChardev *d = MUX_CHARDEV(s);
+        MuxChardev *d = CHARDEV_MUX(s);
         return d->mux_cnt >= 0;
     } else {
         return s->be != NULL;

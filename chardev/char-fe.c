@@ -196,7 +196,7 @@ bool qemu_chr_fe_init(CharBackend *b, Chardev *s, Error **errp)
 
     if (s) {
         if (CHARDEV_IS_MUX(s)) {
-            MuxChardev *d = MUX_CHARDEV(s);
+            MuxChardev *d = CHARDEV_MUX(s);
 
             if (d->mux_cnt >= MAX_MUX) {
                 goto unavailable;
@@ -231,7 +231,7 @@ void qemu_chr_fe_deinit(CharBackend *b, bool del)
             b->chr->be = NULL;
         }
         if (CHARDEV_IS_MUX(b->chr)) {
-            MuxChardev *d = MUX_CHARDEV(b->chr);
+            MuxChardev *d = CHARDEV_MUX(b->chr);
             d->backends[b->tag] = NULL;
         }
         if (del) {

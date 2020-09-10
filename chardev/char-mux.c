@@ -36,7 +36,7 @@
 /* Called with chr_write_lock held.  */
 static int mux_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
     int ret;
     if (!d->timestamps) {
         ret = qemu_chr_fe_write(&d->chr, buf, len);
@@ -128,7 +128,7 @@ static void mux_chr_send_event(MuxChardev *d, int mux_nr, QEMUChrEvent event)
 
 static void mux_chr_be_event(Chardev *chr, QEMUChrEvent event)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
 
     if (d->focus != -1) {
         mux_chr_send_event(d, d->focus, event);
@@ -182,7 +182,7 @@ static int mux_proc_byte(Chardev *chr, MuxChardev *d, int ch)
 
 static void mux_chr_accept_input(Chardev *chr)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
     int m = d->focus;
     CharBackend *be = d->backends[m];
 
@@ -195,7 +195,7 @@ static void mux_chr_accept_input(Chardev *chr)
 
 static int mux_chr_can_read(void *opaque)
 {
-    MuxChardev *d = MUX_CHARDEV(opaque);
+    MuxChardev *d = CHARDEV_MUX(opaque);
     int m = d->focus;
     CharBackend *be = d->backends[m];
 
@@ -213,7 +213,7 @@ static int mux_chr_can_read(void *opaque)
 static void mux_chr_read(void *opaque, const uint8_t *buf, int size)
 {
     Chardev *chr = CHARDEV(opaque);
-    MuxChardev *d = MUX_CHARDEV(opaque);
+    MuxChardev *d = CHARDEV_MUX(opaque);
     int m = d->focus;
     CharBackend *be = d->backends[m];
     int i;
@@ -234,7 +234,7 @@ static void mux_chr_read(void *opaque, const uint8_t *buf, int size)
 
 void mux_chr_send_all_event(Chardev *chr, QEMUChrEvent event)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
     int i;
 
     if (!machine_init_done) {
@@ -254,7 +254,7 @@ static void mux_chr_event(void *opaque, QEMUChrEvent event)
 
 static GSource *mux_chr_add_watch(Chardev *s, GIOCondition cond)
 {
-    MuxChardev *d = MUX_CHARDEV(s);
+    MuxChardev *d = CHARDEV_MUX(s);
     Chardev *chr = qemu_chr_fe_get_driver(&d->chr);
     ChardevClass *cc = CHARDEV_GET_CLASS(chr);
 
@@ -267,7 +267,7 @@ static GSource *mux_chr_add_watch(Chardev *s, GIOCondition cond)
 
 static void char_mux_finalize(Object *obj)
 {
-    MuxChardev *d = MUX_CHARDEV(obj);
+    MuxChardev *d = CHARDEV_MUX(obj);
     int i;
 
     for (i = 0; i < d->mux_cnt; i++) {
@@ -281,7 +281,7 @@ static void char_mux_finalize(Object *obj)
 
 static void mux_chr_update_read_handlers(Chardev *chr)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
 
     /* Fix up the real driver with mux routines */
     qemu_chr_fe_set_handlers_full(&d->chr,
@@ -295,7 +295,7 @@ static void mux_chr_update_read_handlers(Chardev *chr)
 
 void mux_set_focus(Chardev *chr, int focus)
 {
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
 
     assert(focus >= 0);
     assert(focus < d->mux_cnt);
@@ -316,7 +316,7 @@ static void qemu_chr_open_mux(Chardev *chr,
 {
     ChardevMux *mux = backend->u.mux.data;
     Chardev *drv;
-    MuxChardev *d = MUX_CHARDEV(chr);
+    MuxChardev *d = CHARDEV_MUX(chr);
 
     drv = qemu_chr_find(mux->chardev);
     if (drv == NULL) {
