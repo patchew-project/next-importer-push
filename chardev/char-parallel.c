@@ -47,6 +47,9 @@
 #include "chardev/char-fd.h"
 #include "chardev/char-parallel.h"
 
+#define PARALLEL_CHARDEV(obj) \
+    OBJECT_CHECK(ParallelChardev, (obj), TYPE_CHARDEV_PARALLEL)
+
 #if defined(__linux__)
 
 typedef struct {
@@ -54,9 +57,6 @@ typedef struct {
     int fd;
     int mode;
 } ParallelChardev;
-
-#define PARALLEL_CHARDEV(obj) \
-    OBJECT_CHECK(ParallelChardev, (obj), TYPE_CHARDEV_PARALLEL)
 
 static int pp_hw_mode(ParallelChardev *s, uint16_t mode)
 {
@@ -181,9 +181,6 @@ typedef struct {
     Chardev parent;
     int fd;
 } ParallelChardev;
-
-#define PARALLEL_CHARDEV(obj)                                   \
-    OBJECT_CHECK(ParallelChardev, (obj), TYPE_CHARDEV_PARALLEL)
 
 static int pp_ioctl(Chardev *chr, int cmd, void *arg)
 {
