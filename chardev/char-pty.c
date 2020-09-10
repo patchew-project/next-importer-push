@@ -45,7 +45,7 @@ struct PtyChardev {
 };
 typedef struct PtyChardev PtyChardev;
 
-DECLARE_INSTANCE_CHECKER(PtyChardev, PTY_CHARDEV,
+DECLARE_INSTANCE_CHECKER(PtyChardev, CHARDEV_PTY,
                          TYPE_CHARDEV_PTY)
 
 static void pty_chr_state(Chardev *chr, int connected);
@@ -62,7 +62,7 @@ static void pty_chr_timer_cancel(PtyChardev *s)
 static gboolean pty_chr_timer(gpointer opaque)
 {
     struct Chardev *chr = CHARDEV(opaque);
-    PtyChardev *s = PTY_CHARDEV(opaque);
+    PtyChardev *s = CHARDEV_PTY(opaque);
 
     pty_chr_timer_cancel(s);
     if (!s->connected) {
@@ -74,7 +74,7 @@ static gboolean pty_chr_timer(gpointer opaque)
 
 static void pty_chr_rearm_timer(Chardev *chr, int ms)
 {
-    PtyChardev *s = PTY_CHARDEV(chr);
+    PtyChardev *s = CHARDEV_PTY(chr);
     char *name;
 
     pty_chr_timer_cancel(s);
@@ -86,7 +86,7 @@ static void pty_chr_rearm_timer(Chardev *chr, int ms)
 
 static void pty_chr_update_read_handler(Chardev *chr)
 {
-    PtyChardev *s = PTY_CHARDEV(chr);
+    PtyChardev *s = CHARDEV_PTY(chr);
     GPollFD pfd;
     int rc;
     QIOChannelFile *fioc = QIO_CHANNEL_FILE(s->ioc);
@@ -108,7 +108,7 @@ static void pty_chr_update_read_handler(Chardev *chr)
 
 static int char_pty_chr_write(Chardev *chr, const uint8_t *buf, int len)
 {
-    PtyChardev *s = PTY_CHARDEV(chr);
+    PtyChardev *s = CHARDEV_PTY(chr);
 
     if (!s->connected) {
         return len;
@@ -118,7 +118,7 @@ static int char_pty_chr_write(Chardev *chr, const uint8_t *buf, int len)
 
 static GSource *pty_chr_add_watch(Chardev *chr, GIOCondition cond)
 {
-    PtyChardev *s = PTY_CHARDEV(chr);
+    PtyChardev *s = CHARDEV_PTY(chr);
     if (!s->connected) {
         return NULL;
     }
@@ -128,7 +128,7 @@ static GSource *pty_chr_add_watch(Chardev *chr, GIOCondition cond)
 static int pty_chr_read_poll(void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    PtyChardev *s = PTY_CHARDEV(opaque);
+    PtyChardev *s = CHARDEV_PTY(opaque);
 
     s->read_bytes = qemu_chr_be_can_write(chr);
     return s->read_bytes;
@@ -137,7 +137,7 @@ static int pty_chr_read_poll(void *opaque)
 static gboolean pty_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 {
     Chardev *chr = CHARDEV(opaque);
-    PtyChardev *s = PTY_CHARDEV(opaque);
+    PtyChardev *s = CHARDEV_PTY(opaque);
     gsize len;
     uint8_t buf[CHR_READ_BUF_LEN];
     ssize_t ret;
@@ -162,7 +162,7 @@ static gboolean pty_chr_read(QIOChannel *chan, GIOCondition cond, void *opaque)
 
 static void pty_chr_state(Chardev *chr, int connected)
 {
-    PtyChardev *s = PTY_CHARDEV(chr);
+    PtyChardev *s = CHARDEV_PTY(chr);
 
     if (!connected) {
         remove_fd_in_watch(chr);
@@ -189,7 +189,7 @@ static void pty_chr_state(Chardev *chr, int connected)
 static void char_pty_finalize(Object *obj)
 {
     Chardev *chr = CHARDEV(obj);
-    PtyChardev *s = PTY_CHARDEV(obj);
+    PtyChardev *s = CHARDEV_PTY(obj);
 
     pty_chr_state(chr, 0);
     object_unref(OBJECT(s->ioc));
@@ -220,7 +220,7 @@ static void char_pty_open(Chardev *chr,
     qemu_printf("char device redirected to %s (label %s)\n",
                 pty_name, chr->label);
 
-    s = PTY_CHARDEV(chr);
+    s = CHARDEV_PTY(chr);
     s->ioc = QIO_CHANNEL(qio_channel_file_new_fd(master_fd));
     name = g_strdup_printf("chardev-pty-%s", chr->label);
     qio_channel_set_name(QIO_CHANNEL(s->ioc), name);
