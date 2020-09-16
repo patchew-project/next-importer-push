@@ -16,8 +16,8 @@
 typedef struct VMStateIfClass VMStateIfClass;
 DECLARE_CLASS_CHECKERS(VMStateIfClass, VMSTATE_IF,
                        TYPE_VMSTATE_IF)
-#define VMSTATE_IF(obj)                             \
-    INTERFACE_CHECK(VMStateIf, (obj), TYPE_VMSTATE_IF)
+DECLARE_INTERFACE_CHECKER(VMStateIf, VMSTATE_IF,
+                          TYPE_VMSTATE_IF)
 
 typedef struct VMStateIf VMStateIf;
 

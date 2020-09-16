@@ -19,8 +19,8 @@
 typedef struct TestIfClass TestIfClass;
 DECLARE_CLASS_CHECKERS(TestIfClass, TEST_IF,
                        TYPE_TEST_IF)
-#define TEST_IF(obj) \
-     INTERFACE_CHECK(TestIf, (obj), TYPE_TEST_IF)
+DECLARE_INTERFACE_CHECKER(TestIf, TEST_IF,
+                          TYPE_TEST_IF)
 
 typedef struct TestIf TestIf;
 

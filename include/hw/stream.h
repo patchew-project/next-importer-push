@@ -9,8 +9,8 @@
 typedef struct StreamSlaveClass StreamSlaveClass;
 DECLARE_CLASS_CHECKERS(StreamSlaveClass, STREAM_SLAVE,
                        TYPE_STREAM_SLAVE)
-#define STREAM_SLAVE(obj) \
-     INTERFACE_CHECK(StreamSlave, (obj), TYPE_STREAM_SLAVE)
+DECLARE_INTERFACE_CHECKER(StreamSlave, STREAM_SLAVE,
+                          TYPE_STREAM_SLAVE)
 
 typedef struct StreamSlave StreamSlave;
 

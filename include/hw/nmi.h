@@ -29,8 +29,8 @@
 typedef struct NMIClass NMIClass;
 DECLARE_CLASS_CHECKERS(NMIClass, NMI,
                        TYPE_NMI)
-#define NMI(obj) \
-     INTERFACE_CHECK(NMIState, (obj), TYPE_NMI)
+DECLARE_INTERFACE_CHECKER(NMIState, NMI,
+                          TYPE_NMI)
 
 typedef struct NMIState NMIState;
 
