@@ -191,12 +191,16 @@ static inline void bswap64s(uint64_t *s)
 #define CPU_CONVERT(endian, size, type)\
 static inline type endian ## size ## _to_cpu(type v)\
 {\
-    return glue(endian, _bswap)(v, size);\
+    return __builtin_constant_p(v) ?\
+           const_ ## endian ## size(v) :\
+           glue(endian, _bswap)(v, size);\
 }\
 \
 static inline type cpu_to_ ## endian ## size(type v)\
 {\
-    return glue(endian, _bswap)(v, size);\
+    return __builtin_constant_p(v) ?\
+           const_ ## endian ## size(v) :\
+           glue(endian, _bswap)(v, size);\
 }\
 \
 static inline void endian ## size ## _to_cpus(type *p)\
