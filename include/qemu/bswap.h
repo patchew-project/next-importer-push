@@ -83,7 +83,7 @@ static inline void bswap64s(uint64_t *s)
 #endif
 
 /*
- * Same as cpu_to_le{16,32} described below, except that gcc will
+ * Same as cpu_to_{be,le}{16,32} described below, except that gcc will
  * figure the result is a compile-time constant if you pass in a constant.
  * So this can be used to initialize static variables.
  */
@@ -96,11 +96,20 @@ static inline void bswap64s(uint64_t *s)
 # define const_le16(_x)                          \
     ((((_x) & 0x00ff) << 8) |                    \
      (((_x) & 0xff00) >> 8))
+# define const_be32(_x) (_x)
+# define const_be16(_x) (_x)
 #else
 # define const_le32(_x) (_x)
 # define const_le16(_x) (_x)
+# define const_be32(_x)                          \
+    ((((_x) & 0x000000ffU) << 24) |              \
+     (((_x) & 0x0000ff00U) <<  8) |              \
+     (((_x) & 0x00ff0000U) >>  8) |              \
+     (((_x) & 0xff000000U) >> 24))
+# define const_be16(_x)                          \
+    ((((_x) & 0x00ff) << 8) |                    \
+     (((_x) & 0xff00) >> 8))
 #endif
-
 /**
  * Endianness conversion functions between host cpu and specified endianness.
  * (We list the complete set of prototypes produced by the macros below
