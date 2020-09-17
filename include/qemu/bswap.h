@@ -83,11 +83,20 @@ static inline void bswap64s(uint64_t *s)
 #endif
 
 /*
- * Same as cpu_to_{be,le}{16,32} described below, except that gcc will
+ * Same as cpu_to_{be,le}{16,32,64} described below, except that gcc will
  * figure the result is a compile-time constant if you pass in a constant.
  * So this can be used to initialize static variables.
  */
 #if defined(HOST_WORDS_BIGENDIAN)
+# define const_le64(_x)                          \
+    ((((_x) & 0x00000000000000ffU) << 56) |      \
+     (((_x) & 0x000000000000ff00U) << 40) |      \
+     (((_x) & 0x0000000000ff0000U) << 24) |      \
+     (((_x) & 0x00000000ff000000U) <<  8) |      \
+     (((_x) & 0x000000ff00000000U) >>  8) |      \
+     (((_x) & 0x0000ff0000000000U) >> 24) |      \
+     (((_x) & 0x00ff000000000000U) >> 40) |      \
+     (((_x) & 0xff00000000000000U) >> 56))
 # define const_le32(_x)                          \
     ((((_x) & 0x000000ffU) << 24) |              \
      (((_x) & 0x0000ff00U) <<  8) |              \
@@ -96,11 +105,22 @@ static inline void bswap64s(uint64_t *s)
 # define const_le16(_x)                          \
     ((((_x) & 0x00ff) << 8) |                    \
      (((_x) & 0xff00) >> 8))
+# define const_be64(_x) (_x)
 # define const_be32(_x) (_x)
 # define const_be16(_x) (_x)
 #else
+# define const_le64(_x) (_x)
 # define const_le32(_x) (_x)
 # define const_le16(_x) (_x)
+# define const_be64(_x)                          \
+    ((((_x) & 0x00000000000000ffU) << 56) |      \
+     (((_x) & 0x000000000000ff00U) << 40) |      \
+     (((_x) & 0x0000000000ff0000U) << 24) |      \
+     (((_x) & 0x00000000ff000000U) <<  8) |      \
+     (((_x) & 0x000000ff00000000U) >>  8) |      \
+     (((_x) & 0x0000ff0000000000U) >> 24) |      \
+     (((_x) & 0x00ff000000000000U) >> 40) |      \
+     (((_x) & 0xff00000000000000U) >> 56))
 # define const_be32(_x)                          \
     ((((_x) & 0x000000ffU) << 24) |              \
      (((_x) & 0x0000ff00U) <<  8) |              \
