@@ -42,10 +42,10 @@
  *   9     |  acpi      | acpi (ged)
  *  10     |  pci lnk   |
  *  11     |  pci lnk   |
- *  12     |  ps2       |
- *  13     |  fpu       |
- *  14     |  ide 0     |
- *  15     |  ide 1     |
+ *  12     |  ps2       | pcie
+ *  13     |  fpu       | pcie
+ *  14     |  ide 0     | pcie
+ *  15     |  ide 1     | pcie
  *  16-23  |  pci gsi   | virtio
  */
 
@@ -59,10 +59,17 @@
 #define GED_MMIO_BASE_REGS    (GED_MMIO_BASE + 0x200)
 #define GED_MMIO_IRQ          9
 
+#define PCIE_MMIO_BASE        0xc0000000
+#define PCIE_MMIO_SIZE        0x20000000
+#define PCIE_ECAM_BASE        0xe0000000
+#define PCIE_ECAM_SIZE        0x10000000
+#define PCIE_IRQ_BASE         12
+
 /* Machine type options */
 #define MICROVM_MACHINE_PIT                 "pit"
 #define MICROVM_MACHINE_PIC                 "pic"
 #define MICROVM_MACHINE_RTC                 "rtc"
+#define MICROVM_MACHINE_PCIE                "pcie"
 #define MICROVM_MACHINE_ISA_SERIAL          "isa-serial"
 #define MICROVM_MACHINE_OPTION_ROMS         "x-option-roms"
 #define MICROVM_MACHINE_AUTO_KERNEL_CMDLINE "auto-kernel-cmdline"
@@ -80,6 +87,7 @@ struct MicrovmMachineState {
     OnOffAuto pic;
     OnOffAuto pit;
     OnOffAuto rtc;
+    OnOffAuto pcie;
     bool isa_serial;
     bool option_roms;
     bool auto_kernel_cmdline;

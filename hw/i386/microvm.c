@@ -46,6 +46,7 @@
 #include "hw/virtio/virtio-mmio.h"
 #include "hw/acpi/acpi.h"
 #include "hw/acpi/generic_event_device.h"
+#include "hw/pci-host/gpex.h"
 
 #include "cpu.h"
 #include "elf.h"
@@ -101,6 +102,47 @@ static void microvm_gsi_handler(void *opaque, int n, int level)
     qemu_set_irq(s->ioapic_irq[n], level);
 }
 
+static void create_pcie(MicrovmMachineState *mms)
+{
+    X86MachineState *x86ms = X86_MACHINE(mms);
+    hwaddr base_mmio = PCIE_MMIO_BASE;
+    hwaddr size_mmio = PCIE_MMIO_SIZE;
+    hwaddr base_ecam = PCIE_ECAM_BASE;
+    hwaddr size_ecam = PCIE_ECAM_SIZE;
+    MemoryRegion *mmio_alias;
+    MemoryRegion *mmio_reg;
+    MemoryRegion *ecam_alias;
+    MemoryRegion *ecam_reg;
+    DeviceState *dev;
+    int i;
+
+    dev = qdev_new(TYPE_GPEX_HOST);
+    sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &error_fatal);
+
+    /* Map only the first size_ecam bytes of ECAM space */
+    ecam_alias = g_new0(MemoryRegion, 1);
+    ecam_reg = sysbus_mmio_get_region(SYS_BUS_DEVICE(dev), 0);
+    memory_region_init_alias(ecam_alias, OBJECT(dev), "pcie-ecam",
+                             ecam_reg, 0, size_ecam);
+    memory_region_add_subregion(get_system_memory(), base_ecam, ecam_alias);
+
+    /* Map the MMIO window into system address space so as to expose
+     * the section of PCI MMIO space which starts at the same base address
+     * (ie 1:1 mapping for that part of PCI MMIO space visible through
+     * the window).
+     */
+    mmio_alias = g_new0(MemoryRegion, 1);
+    mmio_reg = sysbus_mmio_get_region(SYS_BUS_DEVICE(dev), 1);
+    memory_region_init_alias(mmio_alias, OBJECT(dev), "pcie-mmio",
+                             mmio_reg, base_mmio, size_mmio);
+    memory_region_add_subregion(get_system_memory(), base_mmio, mmio_alias);
+
+    for (i = 0; i < GPEX_NUM_IRQS; i++) {
+        sysbus_connect_irq(SYS_BUS_DEVICE(dev), i,
+                           x86ms->gsi[PCIE_IRQ_BASE + i]);
+    }
+}
+
 static void microvm_devices_init(MicrovmMachineState *mms)
 {
     X86MachineState *x86ms = X86_MACHINE(mms);
@@ -145,6 +187,10 @@ static void microvm_devices_init(MicrovmMachineState *mms)
                            x86ms->gsi[GED_MMIO_IRQ]);
         sysbus_realize(SYS_BUS_DEVICE(dev), &error_fatal);
         x86ms->acpi_dev = HOTPLUG_HANDLER(dev);
+    }
+
+    if (x86_machine_is_acpi_enabled(x86ms) && mms->pcie == ON_OFF_AUTO_ON) {
+        create_pcie(mms);
     }
 
     if (mms->pic == ON_OFF_AUTO_ON || mms->pic == ON_OFF_AUTO_AUTO) {
@@ -446,6 +492,23 @@ static void microvm_machine_set_rtc(Object *obj, Visitor *v, const char *name,
     visit_type_OnOffAuto(v, name, &mms->rtc, errp);
 }
 
+static void microvm_machine_get_pcie(Object *obj, Visitor *v, const char *name,
+                                     void *opaque, Error **errp)
+{
+    MicrovmMachineState *mms = MICROVM_MACHINE(obj);
+    OnOffAuto pcie = mms->pcie;
+
+    visit_type_OnOffAuto(v, name, &pcie, errp);
+}
+
+static void microvm_machine_set_pcie(Object *obj, Visitor *v, const char *name,
+                                     void *opaque, Error **errp)
+{
+    MicrovmMachineState *mms = MICROVM_MACHINE(obj);
+
+    visit_type_OnOffAuto(v, name, &mms->pcie, errp);
+}
+
 static bool microvm_machine_get_isa_serial(Object *obj, Error **errp)
 {
     MicrovmMachineState *mms = MICROVM_MACHINE(obj);
@@ -521,6 +584,7 @@ static void microvm_machine_initfn(Object *obj)
     mms->pic = ON_OFF_AUTO_AUTO;
     mms->pit = ON_OFF_AUTO_AUTO;
     mms->rtc = ON_OFF_AUTO_AUTO;
+    mms->pcie = ON_OFF_AUTO_AUTO;
     mms->isa_serial = true;
     mms->option_roms = true;
     mms->auto_kernel_cmdline = true;
@@ -586,6 +650,13 @@ static void microvm_class_init(ObjectClass *oc, void *data)
                               NULL, NULL);
     object_class_property_set_description(oc, MICROVM_MACHINE_RTC,
         "Enable MC146818 RTC");
+
+    object_class_property_add(oc, MICROVM_MACHINE_PCIE, "OnOffAuto",
+                              microvm_machine_get_pcie,
+                              microvm_machine_set_pcie,
+                              NULL, NULL);
+    object_class_property_set_description(oc, MICROVM_MACHINE_PCIE,
+        "Enable PCIe");
 
     object_class_property_add_bool(oc, MICROVM_MACHINE_ISA_SERIAL,
                                    microvm_machine_get_isa_serial,
