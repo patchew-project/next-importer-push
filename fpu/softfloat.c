@@ -7260,12 +7260,22 @@ typedef struct UInt256 {
 
 static inline uint64_t shl_double(uint64_t h, uint64_t l, unsigned lsh)
 {
+#ifdef __x86_64__
+    asm("shld %b2, %1, %0" : "+r"(h) : "r"(l), "ci"(lsh));
+    return h;
+#else
     return lsh ? (h << lsh) | (l >> (64 - lsh)) : h;
+#endif
 }
 
 static inline uint64_t shr_double(uint64_t h, uint64_t l, unsigned rsh)
 {
+#ifdef __x86_64__
+    asm("shrd %b2, %1, %0" : "+r"(l) : "r"(h), "ci"(rsh));
+    return l;
+#else
     return rsh ? (h << (64 - rsh)) | (l >> rsh) : l;
+#endif
 }
 
 static void shortShift256Left(UInt256 *p, unsigned lsh)
