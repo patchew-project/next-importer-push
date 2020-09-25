@@ -7340,6 +7340,15 @@ static inline void shift256RightJamming(UInt256 *p, unsigned count)
 /* R = A - B */
 static void sub256(UInt256 *r, UInt256 *a, UInt256 *b)
 {
+#if defined(__x86_64__)
+    asm("sub %7, %3\n\t"
+        "sbb %6, %2\n\t"
+        "sbb %5, %1\n\t"
+        "sbb %4, %0"
+        : "=&r"(r->w[0]), "=&r"(r->w[1]), "=&r"(r->w[2]), "=&r"(r->w[3])
+        : "rme"(b->w[0]), "rme"(b->w[1]), "rme"(b->w[2]), "rme"(b->w[3]),
+            "0"(a->w[0]),   "1"(a->w[1]),   "2"(a->w[2]),   "3"(a->w[3]));
+#else
     bool borrow = false;
 
     for (int i = 3; i >= 0; --i) {
@@ -7355,11 +7364,21 @@ static void sub256(UInt256 *r, UInt256 *a, UInt256 *b)
         }
         r->w[i] = rt;
     }
+#endif
 }
 
 /* A = -A */
 static void neg256(UInt256 *a)
 {
+#if defined(__x86_64__)
+    asm("negq %3\n\t"
+        "sbb %6, %2\n\t"
+        "sbb %5, %1\n\t"
+        "sbb %4, %0"
+        : "=&r"(a->w[0]), "=&r"(a->w[1]), "=&r"(a->w[2]), "+rm"(a->w[3])
+        : "rme"(a->w[0]), "rme"(a->w[1]), "rme"(a->w[2]),
+          "0"(0), "1"(0), "2"(0));
+#else
     /*
      * Recall that -X - 1 = ~X, and that since this is negation,
      * once we find a non-zero number, all subsequent words will
@@ -7388,11 +7407,20 @@ static void neg256(UInt256 *a)
     a->w[1] = ~a->w[1];
  not0:
     a->w[0] = ~a->w[0];
+#endif
 }
 
 /* A += B */
 static void add256(UInt256 *a, UInt256 *b)
 {
+#if defined(__x86_64__)
+    asm("add %7, %3\n\t"
+        "adc %6, %2\n\t"
+        "adc %5, %1\n\t"
+        "adc %4, %0"
+        :  "+r"(a->w[0]),  "+r"(a->w[1]),  "+r"(a->w[2]),  "+r"(a->w[3])
+        : "rme"(b->w[0]), "rme"(b->w[1]), "rme"(b->w[2]), "rme"(b->w[3]));
+#else
     bool carry = false;
 
     for (int i = 3; i >= 0; --i) {
@@ -7407,6 +7435,7 @@ static void add256(UInt256 *a, UInt256 *b)
         }
         a->w[i] = at;
     }
+#endif
 }
 
 float128 float128_muladd(float128 a_f, float128 b_f, float128 c_f,
