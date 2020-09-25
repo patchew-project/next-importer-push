@@ -7370,6 +7370,18 @@ static void sub256(UInt256 *r, UInt256 *a, UInt256 *b)
           [b0] "rZ"(b->w[0]), [b1] "rZ"(b->w[1]),
           [b2] "rZ"(b->w[2]), [b3] "rZ"(b->w[3])
         : "cc");
+#elif defined(__powerpc64__)
+    asm("subfc %[r3], %[b3], %[a3]\n\t"
+        "subfe %[r2], %[b2], %[a2]\n\t"
+        "subfe %[r1], %[b1], %[a1]\n\t"
+        "subfe %[r0], %[b0], %[a0]"
+        : [r0] "=&r"(r->w[0]), [r1] "=&r"(r->w[1]),
+          [r2] "=&r"(r->w[2]), [r3] "=&r"(r->w[3])
+        : [a0] "r"(a->w[0]), [a1] "r"(a->w[1]),
+          [a2] "r"(a->w[2]), [a3] "r"(a->w[3]),
+          [b0] "r"(b->w[0]), [b1] "r"(b->w[1]),
+          [b2] "r"(b->w[2]), [b3] "r"(b->w[3])
+        : "ca");
 #else
     bool borrow = false;
 
@@ -7407,6 +7419,13 @@ static void neg256(UInt256 *a)
         "ngc  %0, %0"
         : "+r"(a->w[0]), "+r"(a->w[1]), "+r"(a->w[2]), "+r"(a->w[3])
         : : "cc");
+#elif defined(__powerpc64__)
+    asm("subfic %3, %3, 0\n\t"
+        "subfze %2, %2\n\t"
+        "subfze %1, %1\n\t"
+        "subfze %0, %0"
+        : "+r"(a->w[0]), "+r"(a->w[1]), "+r"(a->w[2]), "+r"(a->w[3])
+        : : "ca");
 #else
     /*
      * Recall that -X - 1 = ~X, and that since this is negation,
@@ -7457,6 +7476,14 @@ static void add256(UInt256 *a, UInt256 *b)
         : "+r"(a->w[0]), "+r"(a->w[1]), "+r"(a->w[2]), "+r"(a->w[3])
         : "rZ"(b->w[0]), "rZ"(b->w[1]), "rZ"(b->w[2]), "rZ"(b->w[3])
         : "cc");
+#elif defined(__powerpc64__)
+    asm("addc %3, %3, %7\n\t"
+        "adde %2, %2, %6\n\t"
+        "adde %1, %1, %5\n\t"
+        "adde %0, %0, %4"
+        : "+r"(a->w[0]), "+r"(a->w[1]), "+r"(a->w[2]), "+r"(a->w[3])
+        :  "r"(b->w[0]),  "r"(b->w[1]),  "r"(b->w[2]),  "r"(b->w[3])
+        : "ca");
 #else
     bool carry = false;
 

@@ -449,6 +449,13 @@ static inline void
         : "=&r"(*z0Ptr), "=&r"(*z1Ptr), "=&r"(*z2Ptr)
         : "rZ"(a0), "rZ"(a1), "rZ"(a2), "rZ"(b0), "rZ"(b1), "rZ"(b2)
         : "cc");
+#elif defined(__powerpc64__)
+    asm("addc %2, %5, %8\n\t"
+        "adde %1, %4, %7\n\t"
+        "adde %0, %3, %6"
+        : "=r"(*z0Ptr), "=&r"(*z1Ptr), "=&r"(*z2Ptr)
+        : "r"(a0), "r"(a1), "r"(a2), "r"(b0), "r"(b1), "r"(b2)
+        : "ca");
 #else
     uint64_t z0, z1, z2;
     int8_t carry0, carry1;
@@ -521,6 +528,13 @@ static inline void
         : "=&r"(*z0Ptr), "=&r"(*z1Ptr), "=&r"(*z2Ptr)
         : "rZ"(a0), "rZ"(a1), "rZ"(a2), "rZ"(b0), "rZ"(b1), "rZ"(b2)
         : "cc");
+#elif defined(__powerpc64__)
+    asm("subfc %2, %8, %5\n\t"
+        "subfe %1, %7, %4\n\t"
+        "subfe %0, %6, %3"
+        : "=&r"(*z0Ptr), "=&r"(*z1Ptr), "=&r"(*z2Ptr)
+        : "r"(a0), "r"(a1), "r"(a2), "r"(b0), "r"(b1), "r"(b2)
+        : "ca");
 #else
     uint64_t z0, z1, z2;
     int8_t borrow0, borrow1;
