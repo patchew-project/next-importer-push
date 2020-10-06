@@ -1492,12 +1492,16 @@ SRST
     ``fmode=fmode``
         Specifies the default mode for newly created files on the host.
         Works only with security models "mapped-xattr" and
-        "mapped-file".
+        "mapped-file". Must be formatted with a preceeding 0 to be
+        interpreted as a octal value (e.g. 0644). The setuid, setgid,
+        and sticky bit are all ignored.
 
     ``dmode=dmode``
         Specifies the default mode for newly created directories on the
         host. Works only with security models "mapped-xattr" and
-        "mapped-file".
+        "mapped-file". Must be formatted with a preceeding 0 to be
+        interpreted as a octal value (e.g. 0755). The setuid, setgid,
+        and sticky bit are all ignored.
 
     ``throttling.bps-total=b,throttling.bps-read=r,throttling.bps-write=w``
         Specify bandwidth throttling limits in bytes per second, either
