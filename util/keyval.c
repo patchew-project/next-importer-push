@@ -14,7 +14,7 @@
  * KEY=VALUE,... syntax:
  *
  *   key-vals     = [ key-val { ',' key-val } [ ',' ] ]
- *   key-val      = key '=' val
+ *   key-val      = 'help' | key '=' val
  *   key          = key-fragment { '.' key-fragment }
  *   key-fragment = / [^=,.]* /
  *   val          = { / [^,]* / | ',,' }
@@ -73,10 +73,14 @@
  *
  * Additional syntax for use with an implied key:
  *
- *   key-vals-ik  = val-no-key [ ',' key-vals ]
+ *   key-vals-ik  = 'help' | val-no-key [ ',' key-vals ]
  *   val-no-key   = / [^=,]* /
  *
  * where no-key is syntactic sugar for implied-key=val-no-key.
+ *
+ * 'help' for key-val or key-vals-ik is not interpreted as part of the
+ * JSON object, but instead requests help, which is a separate boolean
+ * output of the parser.
  */
 
 #include "qemu/osdep.h"
@@ -85,6 +89,7 @@
 #include "qapi/qmp/qlist.h"
 #include "qapi/qmp/qstring.h"
 #include "qemu/cutils.h"
+#include "qemu/help_option.h"
 #include "qemu/option.h"
 
 /*
@@ -166,7 +171,7 @@ static QObject *keyval_parse_put(QDict *cur,
  * On failure, return NULL.
  */
 static const char *keyval_parse_one(QDict *qdict, const char *params,
-                                    const char *implied_key,
+                                    const char *implied_key, bool *help,
                                     Error **errp)
 {
     const char *key, *key_end, *s, *end;
@@ -238,13 +243,20 @@ static const char *keyval_parse_one(QDict *qdict, const char *params,
     if (key == implied_key) {
         assert(!*s);
         s = params;
+    } else if (*s == '=') {
+        s++;
     } else {
-        if (*s != '=') {
+        if (is_help_option_n(key, s - key)) {
+            *help = true;
+            if (*s) {
+                s++;
+            }
+            return s;
+        } else {
             error_setg(errp, "Expected '=' after parameter '%.*s'",
                        (int)(s - key), key);
             return NULL;
         }
-        s++;
     }
 
     val = qstring_new();
@@ -258,6 +270,15 @@ static const char *keyval_parse_one(QDict *qdict, const char *params,
             }
         }
         qstring_append_chr(val, *s++);
+    }
+
+    if (key == implied_key) {
+        const char *str_val = qstring_get_str(val);
+        if (is_help_option(str_val)) {
+            *help = true;
+            qobject_unref(val);
+            return s;
+        }
     }
 
     if (!keyval_parse_put(cur, key_in_cur, val, key, key_end, errp)) {
@@ -388,26 +409,45 @@ static QObject *keyval_listify(QDict *cur, GSList *key_of_cur, Error **errp)
 
 /*
  * Parse @params in QEMU's traditional KEY=VALUE,... syntax.
+ *
  * If @implied_key, the first KEY= can be omitted.  @implied_key is
  * implied then, and VALUE can't be empty or contain ',' or '='.
+ *
+ * An option "help" or "?" without a value isn't added to the
+ * resulting dictionary, but instead is interpreted as requesting
+ * help. If @p_help is non-NULL, it is true on return if help was
+ * requested and false otherwise. All other options are parsed and
+ * returned normally so that context specific help can be printed.
+ *
+ * If @p_help is NULL and help is requested, an error is returned.
+ *
  * On success, return a dictionary of the parsed keys and values.
  * On failure, store an error through @errp and return NULL.
  */
 QDict *keyval_parse(const char *params, const char *implied_key,
-                    Error **errp)
+                    bool *p_help, Error **errp)
 {
     QDict *qdict = qdict_new();
     QObject *listified;
     const char *s;
+    bool help = false;
 
     s = params;
     while (*s) {
-        s = keyval_parse_one(qdict, s, implied_key, errp);
+        s = keyval_parse_one(qdict, s, implied_key, &help, errp);
         if (!s) {
             qobject_unref(qdict);
             return NULL;
         }
         implied_key = NULL;
+    }
+
+    if (p_help) {
+        *p_help = help;
+    } else if (help) {
+        error_setg(errp, "Help is not available for this option");
+        qobject_unref(qdict);
+        return NULL;
     }
 
     listified = keyval_listify(qdict, NULL, errp);

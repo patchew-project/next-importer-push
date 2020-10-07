@@ -19,4 +19,9 @@ static inline bool is_help_option(const char *s)
     return !strcmp(s, "?") || !strcmp(s, "help");
 }
 
+static inline bool is_help_option_n(const char *s, size_t n)
+{
+    return !strncmp(s, "?", n) || !strncmp(s, "help", n);
+}
+
 #endif
