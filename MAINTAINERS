@@ -233,11 +233,9 @@ F: docs/system/cpu-models-mips.rst.inc
 F: hw/intc/mips_gic.c
 F: hw/mips/
 F: hw/misc/mips_*
-F: hw/timer/mips_gictimer.c
 F: include/hw/intc/mips_gic.h
 F: include/hw/mips/
 F: include/hw/misc/mips_*
-F: include/hw/timer/mips_gictimer.h
 F: tests/tcg/mips/
 K: ^Subject:.*(?i)mips
 
@@ -1167,7 +1165,9 @@ S: Odd Fixes
 F: hw/core/loader-fit.c
 F: hw/mips/boston.c
 F: hw/pci-host/xilinx-pcie.c
+F: hw/timer/mips_gictimer.c
 F: include/hw/pci-host/xilinx-pcie.h
+F: include/hw/timer/mips_gictimer.h
 
 OpenRISC Machines
 -----------------
