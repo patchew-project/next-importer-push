@@ -3,7 +3,7 @@
 PowerPC System emulator
 -----------------------
 
-Use the executable ``qemu-system-ppc`` to simulate a complete 40P (PREP)
+Use the executable ``qemu-system-ppc`` to simulate a complete 40P (PReP)
 or PowerMac PowerPC system.
 
 QEMU emulates the following PowerMac peripherals:
@@ -20,7 +20,7 @@ QEMU emulates the following PowerMac peripherals:
 
 -  VIA-CUDA with ADB keyboard and mouse.
 
-QEMU emulates the following 40P (PREP) peripherals:
+QEMU emulates the following 40P (PReP) peripherals:
 
 -  PCI Bridge
 
@@ -43,5 +43,5 @@ the g3beige and mac99 PowerMac and the 40p machines. OpenBIOS is a free
 (GPL v2) portable firmware implementation. The goal is to implement a
 100% IEEE 1275-1994 (referred to as Open Firmware) compliant firmware.
 
-More information is available at
-http://perso.magic.fr/l_indien/qemu-ppc/.
+Archived historical information is available at
+https://web.archive.org/web/20051212135300/http://perso.magic.fr/l_indien/qemu-ppc/.
