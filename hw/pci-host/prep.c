@@ -195,7 +195,7 @@ static const MemoryRegionOps raven_io_ops = {
 
 static int raven_map_irq(PCIDevice *pci_dev, int irq_num)
 {
-    return (irq_num + (pci_dev->devfn >> 3)) & 1;
+    return (irq_num + (pci_dev->devfn >> 3)) & 3;
 }
 
 static void raven_set_irq(void *opaque, int irq_num, int level)
