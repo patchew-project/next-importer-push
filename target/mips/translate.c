@@ -31316,8 +31316,18 @@ void mips_tcg_init(void)
 
 #include "translate_init.c.inc"
 
+static bool init_tlb_entries(CPUMIPSState *env, Error **errp)
+{
+    env->tlb_entries = 1 + extract32(env->cpu_model->CP0_Config1, CP0C1_MMU, 6);
+
+    return true;
+}
+
 bool cpu_mips_realize_env(CPUMIPSState *env, Error **errp)
 {
+    if (!init_tlb_entries(env, errp)) {
+        return false;
+    }
     env->exception_base = (int32_t)0xBFC00000;
 
 #ifndef CONFIG_USER_ONLY
@@ -31357,7 +31367,8 @@ void cpu_state_reset(CPUMIPSState *env)
 #ifdef TARGET_WORDS_BIGENDIAN
     env->CP0_Config0 |= (1 << CP0C0_BE);
 #endif
-    env->CP0_Config1 = env->cpu_model->CP0_Config1;
+    env->CP0_Config1 = deposit32(env->cpu_model->CP0_Config1, CP0C1_MMU, 6,
+                                 env->tlb_entries - 1);
     env->CP0_Config2 = env->cpu_model->CP0_Config2;
     env->CP0_Config3 = env->cpu_model->CP0_Config3;
     env->CP0_Config4 = env->cpu_model->CP0_Config4;
