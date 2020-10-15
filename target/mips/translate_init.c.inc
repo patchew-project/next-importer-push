@@ -258,6 +258,7 @@ const mips_def_t mips_defs[] =
                        (0 << CP0C1_IS) | (3 << CP0C1_IL) | (1 << CP0C1_IA) |
                        (0 << CP0C1_DS) | (3 << CP0C1_DL) | (1 << CP0C1_DA) |
                        (1 << CP0C1_CA),
+        .CP0_Config1_MMU_preset = (const unsigned[]){16, 32, 64, 0},
         .CP0_Config2 = MIPS_CONFIG2,
         .CP0_Config3 = MIPS_CONFIG3 | (1 << CP0C3_VInt) | (1 << CP0C3_MT) |
                        (1 << CP0C3_DSPP),
