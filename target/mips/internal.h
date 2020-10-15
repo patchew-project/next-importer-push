@@ -29,6 +29,7 @@ struct mips_def_t {
     int32_t CP0_PRid;
     int32_t CP0_Config0;
     int32_t CP0_Config1;
+    const unsigned *CP0_Config1_MMU_preset;
     int32_t CP0_Config2;
     int32_t CP0_Config3;
     int32_t CP0_Config4;

@@ -39,6 +39,7 @@
 #include "exec/translator.h"
 #include "exec/log.h"
 #include "qemu/qemu-print.h"
+#include "qapi/error.h"
 
 #define MIPS_DEBUG_DISAS 0
 
@@ -31318,9 +31319,30 @@ void mips_tcg_init(void)
 
 static bool init_tlb_entries(CPUMIPSState *env, Error **errp)
 {
-    env->tlb_entries = 1 + extract32(env->cpu_model->CP0_Config1, CP0C1_MMU, 6);
+    const unsigned *preset = env->cpu_model->CP0_Config1_MMU_preset;
+    bool valid = false;
 
-    return true;
+    if (!env->tlb_entries) {
+        env->tlb_entries = 1 + extract32(env->cpu_model->CP0_Config1,
+                                         CP0C1_MMU, 6);
+        return true;
+    }
+    if (!preset) {
+        error_setg(errp, "Property 'tlb-entries' not modifiable for this CPU");
+        return false;
+    }
+    while (!valid && *preset) {
+        if (*preset == env->tlb_entries) {
+            valid = true;
+            break;
+        }
+        preset++;
+    }
+    if (!valid) {
+        error_setg(errp, "Invalid value '%u' for property 'tlb-entries'",
+                   env->tlb_entries);
+    }
+    return valid;
 }
 
 bool cpu_mips_realize_env(CPUMIPSState *env, Error **errp)
