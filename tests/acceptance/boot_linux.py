@@ -20,7 +20,6 @@ from avocado.utils import network
 from avocado.utils import vmimage
 from avocado.utils import datadrainer
 from avocado.utils.path import find_command
-from avocado import skipIf
 
 ACCEL_NOT_AVAILABLE_FMT = "%s accelerator does not seem to be available"
 KVM_NOT_AVAILABLE = ACCEL_NOT_AVAILABLE_FMT % "KVM"
@@ -114,6 +113,7 @@ class BootLinuxX8664(BootLinux):
 
     def test_pc_i440fx_tcg(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=machine:pc
         :avocado: tags=accel:tcg
         """
@@ -124,6 +124,7 @@ class BootLinuxX8664(BootLinux):
 
     def test_pc_i440fx_kvm(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=machine:pc
         :avocado: tags=accel:kvm
         """
@@ -134,6 +135,7 @@ class BootLinuxX8664(BootLinux):
 
     def test_pc_q35_tcg(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=machine:q35
         :avocado: tags=accel:tcg
         """
@@ -144,6 +146,7 @@ class BootLinuxX8664(BootLinux):
 
     def test_pc_q35_kvm(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=machine:q35
         :avocado: tags=accel:kvm
         """
@@ -171,6 +174,7 @@ class BootLinuxAarch64(BootLinux):
 
     def test_virt_tcg(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=accel:tcg
         :avocado: tags=cpu:max
         """
@@ -184,6 +188,7 @@ class BootLinuxAarch64(BootLinux):
 
     def test_virt_kvm_gicv2(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=accel:kvm
         :avocado: tags=cpu:host
         :avocado: tags=device:gicv2
@@ -198,6 +203,7 @@ class BootLinuxAarch64(BootLinux):
 
     def test_virt_kvm_gicv3(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=accel:kvm
         :avocado: tags=cpu:host
         :avocado: tags=device:gicv3
@@ -220,6 +226,7 @@ class BootLinuxPPC64(BootLinux):
 
     def test_pseries_tcg(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=machine:pseries
         :avocado: tags=accel:tcg
         """
@@ -236,7 +243,6 @@ class BootLinuxS390X(BootLinux):
 
     chksum = '4caaab5a434fd4d1079149a072fdc7891e354f834d355069ca982fdcaf5a122d'
 
-    @skipIf(os.getenv('GITLAB_CI'), 'Running on GitLab')
     def test_s390_ccw_virtio_tcg(self):
         """
         :avocado: tags=machine:s390-ccw-virtio

@@ -19,6 +19,7 @@ class Leon3Machine(Test):
     # and QEMU exit calling cpu_abort(), which makes this test to fail.
     def test_leon3_helenos_uimage(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:sparc
         :avocado: tags=machine:leon3_generic
         :avocado: tags=binfmt:uimage

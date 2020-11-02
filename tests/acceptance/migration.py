@@ -64,17 +64,27 @@ class Migration(Test):
 
 
     def test_migration_with_tcp_localhost(self):
+        """
+        :avocado: tags=gating-ci
+        """
         dest_uri = 'tcp:localhost:%u' % self._get_free_port()
         self.do_migrate(dest_uri)
 
     def test_migration_with_unix(self):
+        """
+        :avocado: tags=gating-ci
+        """
         with tempfile.TemporaryDirectory(prefix='socket_') as socket_path:
             dest_uri = 'unix:%s/qemu-test.sock' % socket_path
             self.do_migrate(dest_uri)
 
     @skipUnless(find_command('nc', default=False), "'nc' command not found")
     def test_migration_with_exec(self):
-        """The test works for both netcat-traditional and netcat-openbsd packages."""
+        """
+        The test works for both netcat-traditional and netcat-openbsd packages.
+
+        :avocado: tags=gating-ci
+        """
         free_port = self._get_free_port()
         dest_uri = 'exec:nc -l localhost %u' % free_port
         src_uri = 'exec:nc localhost %u' % free_port

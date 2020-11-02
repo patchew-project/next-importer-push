@@ -98,6 +98,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_x86_64_pc(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:x86_64
         :avocado: tags=machine:pc
         """
@@ -117,6 +118,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_mips_malta(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips
         :avocado: tags=machine:malta
         :avocado: tags=endian:big
@@ -150,6 +152,7 @@ class BootLinuxConsole(LinuxKernelTest):
         [2] https://kernel-team.pages.debian.net/kernel-handbook/
             ch-common-tasks.html#s-common-official
 
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         """
@@ -171,6 +174,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_mips_malta_cpio(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips
         :avocado: tags=machine:malta
         :avocado: tags=endian:big
@@ -213,6 +217,7 @@ class BootLinuxConsole(LinuxKernelTest):
     @skipUnless(os.getenv('AVOCADO_ALLOW_UNTRUSTED_CODE'), 'untrusted code')
     def test_mips64el_malta_5KEc_cpio(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         :avocado: tags=endian:little
@@ -273,6 +278,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_mips_malta32el_nanomips_4k(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mipsel
         :avocado: tags=machine:malta
         :avocado: tags=endian:little
@@ -285,6 +291,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_mips_malta32el_nanomips_16k_up(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mipsel
         :avocado: tags=machine:malta
         :avocado: tags=endian:little
@@ -297,6 +304,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_mips_malta32el_nanomips_64k_dbg(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mipsel
         :avocado: tags=machine:malta
         :avocado: tags=endian:little
@@ -309,6 +317,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_aarch64_virt(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:aarch64
         :avocado: tags=machine:virt
         """
@@ -330,6 +339,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_aarch64_xlnx_versal_virt(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:aarch64
         :avocado: tags=machine:xlnx-versal-virt
         :avocado: tags=device:pl011
@@ -355,6 +365,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_virt(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:virt
         """
@@ -375,6 +386,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_emcraft_sf2(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:emcraft-sf2
         :avocado: tags=endian:little
@@ -439,6 +451,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_raspi2_uart0(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:raspi2
         :avocado: tags=device:pl011
@@ -447,6 +460,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_exynos4210_initrd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:smdkc210
         """
@@ -489,6 +503,7 @@ class BootLinuxConsole(LinuxKernelTest):
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_cubieboard_initrd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:cubieboard
         """
@@ -531,6 +546,7 @@ class BootLinuxConsole(LinuxKernelTest):
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_cubieboard_sata(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:cubieboard
         """
@@ -622,6 +638,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_quanta_gsj_initrd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:quanta-gsj
         """
@@ -660,6 +677,7 @@ class BootLinuxConsole(LinuxKernelTest):
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_orangepi(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:orangepi-pc
         """
@@ -687,6 +705,7 @@ class BootLinuxConsole(LinuxKernelTest):
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_orangepi_initrd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:orangepi-pc
         """
@@ -731,6 +750,7 @@ class BootLinuxConsole(LinuxKernelTest):
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_orangepi_sd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:orangepi-pc
         :avocado: tags=device:sd
@@ -786,6 +806,7 @@ class BootLinuxConsole(LinuxKernelTest):
     @skipUnless(P7ZIP_AVAILABLE, '7z not installed')
     def test_arm_orangepi_bionic(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:orangepi-pc
         :avocado: tags=device:sd
@@ -829,6 +850,7 @@ class BootLinuxConsole(LinuxKernelTest):
     @skipUnless(os.getenv('AVOCADO_ALLOW_LARGE_STORAGE'), 'storage limited')
     def test_arm_orangepi_uboot_netbsd9(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:orangepi-pc
         :avocado: tags=device:sd
@@ -893,6 +915,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_aarch64_raspi3_atf(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:aarch64
         :avocado: tags=machine:raspi3
         :avocado: tags=cpu:cortex-a53
@@ -915,6 +938,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_s390x_s390_ccw_virtio(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:s390x
         :avocado: tags=machine:s390-ccw-virtio
         """
@@ -935,6 +959,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_alpha_clipper(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:alpha
         :avocado: tags=machine:clipper
         """
@@ -956,6 +981,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_ppc64_pseries(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc64
         :avocado: tags=machine:pseries
         """
@@ -975,6 +1001,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_m68k_q800(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:m68k
         :avocado: tags=machine:q800
         """
@@ -1010,6 +1037,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_arm_vexpressa9(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:vexpress-a9
         """
@@ -1019,6 +1047,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_m68k_mcf5208evb(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:m68k
         :avocado: tags=machine:mcf5208evb
         """
@@ -1027,6 +1056,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_microblaze_s3adsp1800(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:microblaze
         :avocado: tags=machine:petalogix-s3adsp1800
         """
@@ -1035,6 +1065,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_or1k_sim(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:or1k
         :avocado: tags=machine:or1k-sim
         """
@@ -1043,6 +1074,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_nios2_10m50(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:nios2
         :avocado: tags=machine:10m50-ghrd
         """
@@ -1051,6 +1083,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_ppc64_e500(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc64
         :avocado: tags=machine:ppce500
         """
@@ -1060,6 +1093,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_ppc_g3beige(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:g3beige
         """
@@ -1069,6 +1103,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_ppc_mac99(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:mac99
         """
@@ -1078,6 +1113,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_sh4_r2d(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:sh4
         :avocado: tags=machine:r2d
         """
@@ -1087,6 +1123,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_sparc_ss20(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:sparc
         :avocado: tags=machine:SS-20
         """
@@ -1095,6 +1132,7 @@ class BootLinuxConsole(LinuxKernelTest):
 
     def test_xtensa_lx60(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:xtensa
         :avocado: tags=machine:lx60
         """

@@ -19,6 +19,7 @@ class CanonA1100Machine(Test):
 
     def test_arm_canona1100(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:canon-a1100
         :avocado: tags=device:pflash_cfi02

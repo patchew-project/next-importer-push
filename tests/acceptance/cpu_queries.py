@@ -19,6 +19,7 @@ class QueryCPUModelExpansion(Test):
 
     def test(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:x86_64
         :avocado: tags=machine:none
         """

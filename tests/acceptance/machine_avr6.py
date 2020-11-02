@@ -26,6 +26,7 @@ class AVR6Machine(Test):
 
     def test_freertos(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:avr
         :avocado: tags=machine:arduino-mega-2560-v3
         """

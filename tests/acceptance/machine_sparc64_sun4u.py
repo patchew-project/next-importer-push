@@ -21,6 +21,7 @@ class Sun4uMachine(LinuxKernelTest):
 
     def test_sparc64_sun4u(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:sparc64
         :avocado: tags=machine:sun4u
         """

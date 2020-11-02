@@ -11,6 +11,9 @@ from avocado_qemu import Test
 
 class EmptyCPUModel(Test):
     def test(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.vm.add_args('-S', '-display', 'none', '-machine', 'none', '-cpu', '')
         self.vm.set_qmp_monitor(enabled=False)
         self.vm.launch()

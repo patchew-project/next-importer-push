@@ -35,6 +35,7 @@ class N8x0Machine(Test):
     @skipUnless(os.getenv('AVOCADO_ALLOW_UNTRUSTED_CODE'), 'untrusted code')
     def test_n800(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:n800
         """
@@ -43,6 +44,7 @@ class N8x0Machine(Test):
     @skipUnless(os.getenv('AVOCADO_ALLOW_UNTRUSTED_CODE'), 'untrusted code')
     def test_n810(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:n810
         """

@@ -7,7 +7,6 @@
 
 import os
 
-from avocado import skipIf
 from avocado import skipUnless
 from avocado_qemu import Test
 from avocado_qemu import wait_for_console_pattern
@@ -49,6 +48,7 @@ class IbmPrep40pMachine(Test):
 
     def test_openbios_192m(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:40p
         """
@@ -62,6 +62,7 @@ class IbmPrep40pMachine(Test):
 
     def test_openbios_and_netbsd(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:40p
         """

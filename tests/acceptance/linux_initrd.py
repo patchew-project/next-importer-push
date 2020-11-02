@@ -13,7 +13,6 @@ import logging
 import tempfile
 
 from avocado_qemu import Test
-from avocado import skipIf
 
 
 class LinuxInitrd(Test):
@@ -32,6 +31,8 @@ class LinuxInitrd(Test):
         and expect it exits with error message.
         Fedora-18 shipped with linux-3.6 which have not supported xloadflags
         cannot support more than 2GiB initrd.
+
+        :avocado: tags=gating-ci
         """
         kernel_url = ('https://archives.fedoraproject.org/pub/archive/fedora/li'
                       'nux/releases/18/Fedora/x86_64/os/images/pxeboot/vmlinuz')
@@ -53,7 +54,6 @@ class LinuxInitrd(Test):
                 max_size + 1)
             self.assertRegex(self.vm.get_log(), expected_msg)
 
-    @skipIf(os.getenv('GITLAB_CI'), 'Running on GitLab')
     def test_with_2gib_file_should_work_with_linux_v4_16(self):
         """
         QEMU has supported up to 4 GiB initrd for recent kernel

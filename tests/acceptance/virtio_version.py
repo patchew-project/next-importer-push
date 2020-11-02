@@ -149,6 +149,9 @@ class VirtioVersionCheck(Test):
         self.check_all_variants('virtio-9p-pci', VIRTIO_9P)
 
     def test_conventional_devs(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.check_all_variants('virtio-net-pci', VIRTIO_NET)
         self.check_all_variants('virtio-serial-pci', VIRTIO_CONSOLE)
         self.check_all_variants('virtio-rng-pci', VIRTIO_RNG)
@@ -171,6 +174,9 @@ class VirtioVersionCheck(Test):
         self.assertIn('pci-express-device', ifaces)
 
     def test_modern_only_devs(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.check_modern_only('virtio-vga', VIRTIO_GPU)
         self.check_modern_only('virtio-gpu-pci', VIRTIO_GPU)
         self.check_modern_only('virtio-mouse-pci', VIRTIO_INPUT)

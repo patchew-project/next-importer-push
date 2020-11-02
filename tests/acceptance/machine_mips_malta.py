@@ -15,7 +15,6 @@ from avocado import skipUnless
 from avocado_qemu import Test
 from avocado_qemu import wait_for_console_pattern
 from avocado.utils import archive
-from avocado import skipIf
 
 
 NUMPY_AVAILABLE = True
@@ -94,6 +93,7 @@ class MaltaMachineFramebuffer(Test):
 
     def test_mips_malta_i6400_framebuffer_logo_1core(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         :avocado: tags=cpu:i6400
@@ -102,6 +102,7 @@ class MaltaMachineFramebuffer(Test):
 
     def test_mips_malta_i6400_framebuffer_logo_7cores(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         :avocado: tags=cpu:i6400
@@ -111,6 +112,7 @@ class MaltaMachineFramebuffer(Test):
 
     def test_mips_malta_i6400_framebuffer_logo_8cores(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         :avocado: tags=cpu:i6400

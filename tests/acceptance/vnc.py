@@ -21,6 +21,9 @@ class Vnc(Test):
         self.assertFalse(self.vm.qmp('query-vnc')['return']['enabled'])
 
     def test_no_vnc_change_password(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.vm.add_args('-nodefaults', '-S')
         self.vm.launch()
         self.assertFalse(self.vm.qmp('query-vnc')['return']['enabled'])
@@ -35,6 +38,9 @@ class Vnc(Test):
                          'Could not set password')
 
     def test_change_password_requires_a_password(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.vm.add_args('-nodefaults', '-S', '-vnc', ':0')
         self.vm.launch()
         self.assertTrue(self.vm.qmp('query-vnc')['return']['enabled'])
@@ -49,6 +55,9 @@ class Vnc(Test):
                          'Could not set password')
 
     def test_change_password(self):
+        """
+        :avocado: tags=gating-ci
+        """
         self.vm.add_args('-nodefaults', '-S', '-vnc', ':0,password')
         self.vm.launch()
         self.assertTrue(self.vm.qmp('query-vnc')['return']['enabled'])

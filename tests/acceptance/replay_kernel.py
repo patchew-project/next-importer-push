@@ -14,7 +14,6 @@ import shutil
 import logging
 import time
 
-from avocado import skipIf
 from avocado import skipUnless
 from avocado_qemu import wait_for_console_pattern
 from avocado.utils import archive
@@ -77,7 +76,6 @@ class ReplayKernelBase(LinuxKernelTest):
         logger.info('replay overhead {:.2%}'.format(t2 / t1 - 1))
 
 class ReplayKernelNormal(ReplayKernelBase):
-    @skipIf(os.getenv('GITLAB_CI'), 'Running on GitLab')
     def test_x86_64_pc(self):
         """
         :avocado: tags=arch:x86_64
@@ -96,6 +94,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_mips_malta(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips
         :avocado: tags=machine:malta
         :avocado: tags=endian:big
@@ -125,6 +124,7 @@ class ReplayKernelNormal(ReplayKernelBase):
         [2] https://kernel-team.pages.debian.net/kernel-handbook/
             ch-common-tasks.html#s-common-official
 
+        :avocado: tags=gating-ci
         :avocado: tags=arch:mips64el
         :avocado: tags=machine:malta
         """
@@ -141,6 +141,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_aarch64_virt(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:aarch64
         :avocado: tags=machine:virt
         :avocado: tags=cpu:cortex-a53
@@ -160,6 +161,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_arm_virt(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:virt
         """
@@ -175,7 +177,6 @@ class ReplayKernelNormal(ReplayKernelBase):
 
         self.run_rr(kernel_path, kernel_command_line, console_pattern, shift=1)
 
-    @skipIf(os.getenv('GITLAB_CI'), 'Running on GitLab')
     @skipUnless(os.getenv('ARMBIAN_ARTIFACTS_CACHED'),
                 'Test artifacts fetched from unreliable apt.armbian.com')
     def test_arm_cubieboard_initrd(self):
@@ -211,6 +212,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_ppc64_pseries(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc64
         :avocado: tags=machine:pseries
         """
@@ -227,6 +229,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_m68k_q800(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:m68k
         :avocado: tags=machine:q800
         """
@@ -258,6 +261,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_arm_vexpressa9(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:vexpress-a9
         """
@@ -271,6 +275,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_m68k_mcf5208evb(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:m68k
         :avocado: tags=machine:mcf5208evb
         """
@@ -282,6 +287,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_microblaze_s3adsp1800(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:microblaze
         :avocado: tags=machine:petalogix-s3adsp1800
         """
@@ -293,6 +299,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_ppc64_e500(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc64
         :avocado: tags=machine:ppce500
         :avocado: tags=cpu:e5500
@@ -305,6 +312,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_ppc_g3beige(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:g3beige
         """
@@ -317,6 +325,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_ppc_mac99(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:ppc
         :avocado: tags=machine:mac99
         """
@@ -329,6 +338,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_sparc_ss20(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:sparc
         :avocado: tags=machine:SS-20
         """
@@ -340,6 +350,7 @@ class ReplayKernelNormal(ReplayKernelBase):
 
     def test_xtensa_lx60(self):
         """
+        :avocado: tags=gating-ci
         :avocado: tags=arch:xtensa
         :avocado: tags=machine:lx60
         :avocado: tags=cpu:dc233c

@@ -54,6 +54,7 @@ class IntegratorMachine(Test):
     def test_integratorcp_console(self):
         """
         Boots the Linux kernel and checks that the console is operational
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:integratorcp
         :avocado: tags=device:pl011
@@ -67,6 +68,7 @@ class IntegratorMachine(Test):
     def test_framebuffer_tux_logo(self):
         """
         Boot Linux and verify the Tux logo is displayed on the framebuffer.
+        :avocado: tags=gating-ci
         :avocado: tags=arch:arm
         :avocado: tags=machine:integratorcp
         :avocado: tags=device:pl110

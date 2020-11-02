@@ -28,6 +28,7 @@ class X86CPUModelAliases(avocado_qemu.Test):
     """
     Validation of PC CPU model versions and CPU model aliases
 
+    :avocado: tags=gating-ci
     :avocado: tags=arch:x86_64
     """
     def validate_aliases(self, cpus):
