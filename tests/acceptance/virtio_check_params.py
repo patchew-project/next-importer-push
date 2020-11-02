@@ -42,6 +42,12 @@ VM_DEV_PARAMS = {'virtio-scsi-pci': ['-device', 'virtio-scsi-pci,id=scsi0'],
 
 
 class VirtioMaxSegSettingsCheck(Test):
+    """
+    This test should be multi-arch, however only X86 is implemented.
+
+    :avocado: tags=arch:x86_64
+    """
+
     @staticmethod
     def make_pattern(props):
         pattern_items = ['{0} = \w+'.format(prop) for prop in props]
@@ -117,7 +123,6 @@ class VirtioMaxSegSettingsCheck(Test):
             return True
         return False
 
-    @skip("break multi-arch CI")
     def test_machine_types(self):
         # collect all machine types except 'none', 'isapc', 'microvm'
         with QEMUMachine(self.qemu_bin) as vm:
