@@ -140,17 +140,20 @@ class VirtioVersionCheck(Test):
         self.assertIn('conventional-pci-device', trans_ifaces)
         self.assertNotIn('pci-express-device', trans_ifaces)
 
+    @skip("virtio-blk requires 'driver' parameter")
+    def test_conventional_devs_driver(self):
+        self.check_all_variants('virtio-blk-pci', VIRTIO_BLOCK)
+
+    @skip("virtio-9p requires 'fsdev' parameter")
+    def test_conventional_devs_fsdev(self):
+        self.check_all_variants('virtio-9p-pci', VIRTIO_9P)
 
     def test_conventional_devs(self):
         self.check_all_variants('virtio-net-pci', VIRTIO_NET)
-        # virtio-blk requires 'driver' parameter
-        #self.check_all_variants('virtio-blk-pci', VIRTIO_BLOCK)
         self.check_all_variants('virtio-serial-pci', VIRTIO_CONSOLE)
         self.check_all_variants('virtio-rng-pci', VIRTIO_RNG)
         self.check_all_variants('virtio-balloon-pci', VIRTIO_BALLOON)
         self.check_all_variants('virtio-scsi-pci', VIRTIO_SCSI)
-        # virtio-9p requires 'fsdev' parameter
-        #self.check_all_variants('virtio-9p-pci', VIRTIO_9P)
 
     def check_modern_only(self, qemu_devtype, virtio_devid):
         """Check if a modern-only virtio device type behaves as expected"""
