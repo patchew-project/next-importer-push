@@ -1440,6 +1440,7 @@ if have_system
     'chardev',
     'hw/9pfs',
     'hw/acpi',
+    'hw/adc',
     'hw/alpha',
     'hw/arm',
     'hw/audio',
