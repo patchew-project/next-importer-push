@@ -2150,6 +2150,11 @@ M: Leonid Bloch <lb.workbox@gmail.com>
 S: Maintained
 F: hw/acpi/acad.*
 
+Button
+M: Leonid Bloch <lb.workbox@gmail.com>
+S: Maintained
+F: hw/acpi/button.*
+
 Subsystems
 ----------
 Audio
