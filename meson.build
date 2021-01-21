@@ -1696,6 +1696,7 @@ target_softmmu_arch = {}
 
 # TODO: add each directory to the subdirs from its own meson.build, once
 # we have those
+trace_events_config = []
 trace_events_subdirs = [
   'accel/kvm',
   'accel/tcg',
