@@ -89,6 +89,11 @@
  *   by the controller. To add support for the optional feature, needs to
  *   set the corresponding support indicated bit.
  *
+ * - `oacs`
+ *   This field indicates the optional Admin commands and features supported
+ *   by the controller. To add support for the optional feature, needs to
+ *   set the corresponding support indicated bit.
+ *
  * nvme namespace device parameters
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * - `subsys`
@@ -188,20 +193,6 @@ static const uint32_t nvme_feature_cap[NVME_FID_MAX] = {
     [NVME_NUMBER_OF_QUEUES]         = NVME_FEAT_CAP_CHANGE,
     [NVME_ASYNCHRONOUS_EVENT_CONF]  = NVME_FEAT_CAP_CHANGE,
     [NVME_TIMESTAMP]                = NVME_FEAT_CAP_CHANGE,
-};
-
-static const uint32_t nvme_cse_acs[NVME_MAX_COMMANDS] = {
-    [NVME_ADM_CMD_DELETE_SQ]        = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_CREATE_SQ]        = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_GET_LOG_PAGE]     = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_DELETE_CQ]        = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_CREATE_CQ]        = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_IDENTIFY]         = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_ABORT]            = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_SET_FEATURES]     = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_GET_FEATURES]     = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_ASYNC_EV_REQ]     = NVME_CMD_EFF_CSUPP,
-    [NVME_ADM_CMD_NS_ATTACHMENT]    = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_NIC,
 };
 
 static const uint32_t nvme_cse_iocs_none[NVME_MAX_COMMANDS];
@@ -3068,7 +3059,7 @@ static uint16_t nvme_cmd_effects(NvmeCtrl *n, uint8_t csi, uint32_t buf_len,
         }
     }
 
-    memcpy(log.acs, nvme_cse_acs, sizeof(nvme_cse_acs));
+    memcpy(log.acs, n->acs, sizeof(n->acs));
 
     if (src_iocs) {
         memcpy(log.iocs, src_iocs, sizeof(log.iocs));
@@ -4057,7 +4048,7 @@ static uint16_t nvme_admin_cmd(NvmeCtrl *n, NvmeRequest *req)
     trace_pci_nvme_admin_cmd(nvme_cid(req), nvme_sqid(req), req->cmd.opcode,
                              nvme_adm_opc_str(req->cmd.opcode));
 
-    if (!(nvme_cse_acs[req->cmd.opcode] & NVME_CMD_EFF_CSUPP)) {
+    if (!(n->acs[req->cmd.opcode] & NVME_CMD_EFF_CSUPP)) {
         trace_pci_nvme_err_invalid_admin_opc(req->cmd.opcode);
         return NVME_INVALID_OPCODE | NVME_DNR;
     }
@@ -4868,6 +4859,25 @@ static void nvme_init_cse_iocs(NvmeCtrl *n)
     n->iocs.zoned[NVME_CMD_ZONE_MGMT_RECV] = NVME_CMD_EFF_CSUPP;
 }
 
+static void nvme_init_cse_acs(NvmeCtrl *n)
+{
+    n->acs[NVME_ADM_CMD_DELETE_SQ] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_CREATE_SQ] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_GET_LOG_PAGE] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_DELETE_CQ] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_CREATE_CQ] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_IDENTIFY] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_ABORT] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_SET_FEATURES] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_GET_FEATURES] = NVME_CMD_EFF_CSUPP;
+    n->acs[NVME_ADM_CMD_ASYNC_EV_REQ] = NVME_CMD_EFF_CSUPP;
+
+    if (n->params.oacs & NVME_OACS_NS_MGMT) {
+        n->acs[NVME_ADM_CMD_NS_ATTACHMENT] =
+            NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_NIC;
+    }
+}
+
 static void nvme_init_state(NvmeCtrl *n)
 {
     n->num_namespaces = NVME_MAX_NAMESPACES;
@@ -4881,6 +4891,7 @@ static void nvme_init_state(NvmeCtrl *n)
     n->starttime_ms = qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL);
     n->aer_reqs = g_new0(NvmeRequest *, n->params.aerl + 1);
 
+    nvme_init_cse_acs(n);
     nvme_init_cse_iocs(n);
 }
 
@@ -5097,7 +5108,7 @@ static void nvme_init_ctrl(NvmeCtrl *n, PCIDevice *pci_dev)
 
     id->mdts = n->params.mdts;
     id->ver = cpu_to_le32(NVME_SPEC_VER);
-    id->oacs = cpu_to_le16(NVME_OACS_NS_MGMT);
+    id->oacs = cpu_to_le16(n->params.oacs);
     id->cntrltype = 0x1;
 
     /*
@@ -5272,6 +5283,7 @@ static Property nvme_props[] = {
     DEFINE_PROP_UINT16("oncs", NvmeCtrl, params.oncs, NVME_ONCS_WRITE_ZEROES |
                        NVME_ONCS_TIMESTAMP | NVME_ONCS_DSM |
                        NVME_ONCS_COMPARE | NVME_ONCS_FEATURES | NVME_ONCS_COPY),
+    DEFINE_PROP_UINT16("oacs", NvmeCtrl, params.oacs, NVME_OACS_NS_MGMT),
     DEFINE_PROP_END_OF_LIST(),
 };
 

@@ -30,6 +30,7 @@ typedef struct NvmeParams {
     uint8_t  zasl;
     bool     legacy_cmb;
     uint16_t oncs;
+    uint16_t oacs;
 } NvmeParams;
 
 typedef struct NvmeAsyncEvent {
@@ -212,6 +213,8 @@ typedef struct NvmeCtrl {
     NvmeCQueue      admin_cq;
     NvmeIdCtrl      id_ctrl;
     NvmeFeatureVal  features;
+
+    uint32_t acs[NVME_MAX_COMMANDS];
 
     struct {
         uint32_t nvm[NVME_MAX_COMMANDS];
