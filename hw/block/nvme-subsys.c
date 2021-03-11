@@ -60,7 +60,11 @@ int nvme_subsys_register_ns(NvmeNamespace *ns, Error **errp)
     for (i = 0; i < ARRAY_SIZE(subsys->ctrls); i++) {
         n = subsys->ctrls[i];
 
-        if (n && nvme_register_namespace(n, ns, errp)) {
+        if (!n || n->params.administrative) {
+            continue;
+        }
+
+        if (nvme_register_namespace(n, ns, errp)) {
             return -1;
         }
     }

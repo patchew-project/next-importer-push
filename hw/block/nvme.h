@@ -31,6 +31,7 @@ typedef struct NvmeParams {
     bool     legacy_cmb;
     uint16_t oncs;
     uint16_t oacs;
+    bool     administrative;
 } NvmeParams;
 
 typedef struct NvmeAsyncEvent {

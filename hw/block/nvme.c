@@ -94,6 +94,10 @@
  *   by the controller. To add support for the optional feature, needs to
  *   set the corresponding support indicated bit.
  *
+ * - 'administrative'
+ *   Set to true/on to make this an Administrative Controller. By default, the
+ *   controller will present itself as an I/O Controller.
+ *
  * nvme namespace device parameters
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * - `subsys`
@@ -182,6 +186,15 @@ static const bool nvme_feature_support[NVME_FID_MAX] = {
     [NVME_INTERRUPT_COALESCING]     = true,
     [NVME_INTERRUPT_VECTOR_CONF]    = true,
     [NVME_WRITE_ATOMICITY]          = true,
+    [NVME_ASYNCHRONOUS_EVENT_CONF]  = true,
+    [NVME_TIMESTAMP]                = true,
+};
+
+static const bool nvme_admin_ctrl_feature_support[NVME_FID_MAX] = {
+    [NVME_POWER_MANAGEMENT]         = true,
+    [NVME_TEMPERATURE_THRESHOLD]    = true,
+    [NVME_INTERRUPT_COALESCING]     = true,
+    [NVME_INTERRUPT_VECTOR_CONF]    = true,
     [NVME_ASYNCHRONOUS_EVENT_CONF]  = true,
     [NVME_TIMESTAMP]                = true,
 };
@@ -3634,6 +3647,12 @@ static uint16_t nvme_get_feature_timestamp(NvmeCtrl *n, NvmeRequest *req)
     return nvme_c2h(n, (uint8_t *)&timestamp, sizeof(timestamp), req);
 }
 
+static inline bool nvme_check_fid_support(NvmeCtrl *n, uint8_t fid)
+{
+    return n->params.administrative ?
+        nvme_admin_ctrl_feature_support[fid] : nvme_feature_support[fid];
+}
+
 static uint16_t nvme_get_feature(NvmeCtrl *n, NvmeRequest *req)
 {
     NvmeCmd *cmd = &req->cmd;
@@ -3653,7 +3672,7 @@ static uint16_t nvme_get_feature(NvmeCtrl *n, NvmeRequest *req)
 
     trace_pci_nvme_getfeat(nvme_cid(req), nsid, fid, sel, dw11);
 
-    if (!nvme_feature_support[fid]) {
+    if (!nvme_check_fid_support(n, fid)) {
         return NVME_INVALID_FIELD | NVME_DNR;
     }
 
@@ -3831,7 +3850,7 @@ static uint16_t nvme_set_feature(NvmeCtrl *n, NvmeRequest *req)
         return NVME_FID_NOT_SAVEABLE | NVME_DNR;
     }
 
-    if (!nvme_feature_support[fid]) {
+    if (!nvme_check_fid_support(n, fid)) {
         return NVME_INVALID_FIELD | NVME_DNR;
     }
 
@@ -4829,25 +4848,27 @@ static void nvme_init_cse_iocs(NvmeCtrl *n)
 {
     uint16_t oncs = n->params.oncs;
 
-    n->iocs.nvm[NVME_CMD_FLUSH] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
-    n->iocs.nvm[NVME_CMD_WRITE] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
-    n->iocs.nvm[NVME_CMD_READ]  = NVME_CMD_EFF_CSUPP;
+    if (!n->params.administrative) {
+        n->iocs.nvm[NVME_CMD_FLUSH] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
+        n->iocs.nvm[NVME_CMD_WRITE] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
+        n->iocs.nvm[NVME_CMD_READ]  = NVME_CMD_EFF_CSUPP;
 
-    if (oncs & NVME_ONCS_WRITE_ZEROES) {
-        n->iocs.nvm[NVME_CMD_WRITE_ZEROES] = NVME_CMD_EFF_CSUPP |
-            NVME_CMD_EFF_LBCC;
-    }
+        if (oncs & NVME_ONCS_WRITE_ZEROES) {
+            n->iocs.nvm[NVME_CMD_WRITE_ZEROES] = NVME_CMD_EFF_CSUPP |
+                NVME_CMD_EFF_LBCC;
+        }
 
-    if (oncs & NVME_ONCS_COMPARE) {
-        n->iocs.nvm[NVME_CMD_COMPARE] = NVME_CMD_EFF_CSUPP;
-    }
+        if (oncs & NVME_ONCS_COMPARE) {
+            n->iocs.nvm[NVME_CMD_COMPARE] = NVME_CMD_EFF_CSUPP;
+        }
 
-    if (oncs & NVME_ONCS_DSM) {
-        n->iocs.nvm[NVME_CMD_DSM] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
-    }
+        if (oncs & NVME_ONCS_DSM) {
+            n->iocs.nvm[NVME_CMD_DSM] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
+        }
 
-    if (oncs & NVME_ONCS_COPY) {
-        n->iocs.nvm[NVME_CMD_COPY] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
+        if (oncs & NVME_ONCS_COPY) {
+            n->iocs.nvm[NVME_CMD_COPY] = NVME_CMD_EFF_CSUPP | NVME_CMD_EFF_LBCC;
+        }
     }
 
     memcpy(n->iocs.zoned, n->iocs.nvm, sizeof(n->iocs.nvm));
@@ -4861,11 +4882,14 @@ static void nvme_init_cse_iocs(NvmeCtrl *n)
 
 static void nvme_init_cse_acs(NvmeCtrl *n)
 {
-    n->acs[NVME_ADM_CMD_DELETE_SQ] = NVME_CMD_EFF_CSUPP;
-    n->acs[NVME_ADM_CMD_CREATE_SQ] = NVME_CMD_EFF_CSUPP;
+    if (!n->params.administrative) {
+        n->acs[NVME_ADM_CMD_DELETE_SQ] = NVME_CMD_EFF_CSUPP;
+        n->acs[NVME_ADM_CMD_CREATE_SQ] = NVME_CMD_EFF_CSUPP;
+        n->acs[NVME_ADM_CMD_DELETE_CQ] = NVME_CMD_EFF_CSUPP;
+        n->acs[NVME_ADM_CMD_CREATE_CQ] = NVME_CMD_EFF_CSUPP;
+    }
+
     n->acs[NVME_ADM_CMD_GET_LOG_PAGE] = NVME_CMD_EFF_CSUPP;
-    n->acs[NVME_ADM_CMD_DELETE_CQ] = NVME_CMD_EFF_CSUPP;
-    n->acs[NVME_ADM_CMD_CREATE_CQ] = NVME_CMD_EFF_CSUPP;
     n->acs[NVME_ADM_CMD_IDENTIFY] = NVME_CMD_EFF_CSUPP;
     n->acs[NVME_ADM_CMD_ABORT] = NVME_CMD_EFF_CSUPP;
     n->acs[NVME_ADM_CMD_SET_FEATURES] = NVME_CMD_EFF_CSUPP;
@@ -4912,6 +4936,12 @@ static int nvme_attach_namespace(NvmeCtrl *n, NvmeNamespace *ns, Error **errp)
 int nvme_register_namespace(NvmeCtrl *n, NvmeNamespace *ns, Error **errp)
 {
     uint32_t nsid = nvme_nsid(ns);
+
+    if (n->params.administrative) {
+        error_setg(errp,
+                   "cannot attach namespace to administrative controller");
+        return -1;
+    }
 
     if (nsid > NVME_MAX_NAMESPACES) {
         error_setg(errp, "invalid namespace id (must be between 0 and %d)",
@@ -5006,12 +5036,13 @@ static int nvme_init_pci(NvmeCtrl *n, PCIDevice *pci_dev, Error **errp)
     uint8_t *pci_conf = pci_dev->config;
     uint64_t bar_size, msix_table_size, msix_pba_size;
     unsigned msix_table_offset, msix_pba_offset;
+    uint8_t prog_interface = n->params.administrative ? 0x3 : 0x2;
     int ret;
 
     Error *err = NULL;
 
     pci_conf[PCI_INTERRUPT_PIN] = 1;
-    pci_config_set_prog_interface(pci_conf, 0x2);
+    pci_config_set_prog_interface(pci_conf, prog_interface);
 
     if (n->params.use_intel_id) {
         pci_config_set_vendor_id(pci_conf, PCI_VENDOR_ID_INTEL);
@@ -5109,7 +5140,8 @@ static void nvme_init_ctrl(NvmeCtrl *n, PCIDevice *pci_dev)
     id->mdts = n->params.mdts;
     id->ver = cpu_to_le32(NVME_SPEC_VER);
     id->oacs = cpu_to_le16(n->params.oacs);
-    id->cntrltype = 0x1;
+    id->cntrltype = n->params.administrative ?
+        NVME_CNTRL_TYPE_ADMIN : NVME_CNTRL_TYPE_IO;
 
     /*
      * Because the controller always completes the Abort command immediately,
@@ -5159,7 +5191,12 @@ static void nvme_init_ctrl(NvmeCtrl *n, PCIDevice *pci_dev)
         id->cmic |= NVME_CMIC_MULTI_CTRL;
     }
 
-    NVME_CAP_SET_MQES(n->bar.cap, 0x7ff);
+    if (n->params.administrative) {
+        NVME_CAP_SET_MQES(n->bar.cap, 0);
+    } else {
+        NVME_CAP_SET_MQES(n->bar.cap, 0x7ff);
+    }
+
     NVME_CAP_SET_CQR(n->bar.cap, 1);
     NVME_CAP_SET_TO(n->bar.cap, 0xf);
     NVME_CAP_SET_CSS(n->bar.cap, NVME_CAP_CSS_NVM);
@@ -5284,6 +5321,7 @@ static Property nvme_props[] = {
                        NVME_ONCS_TIMESTAMP | NVME_ONCS_DSM |
                        NVME_ONCS_COMPARE | NVME_ONCS_FEATURES | NVME_ONCS_COPY),
     DEFINE_PROP_UINT16("oacs", NvmeCtrl, params.oacs, NVME_OACS_NS_MGMT),
+    DEFINE_PROP_BOOL("administrative", NvmeCtrl, params.administrative, false),
     DEFINE_PROP_END_OF_LIST(),
 };
 

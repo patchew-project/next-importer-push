@@ -586,6 +586,11 @@ enum NvmeIoCommands {
     NVME_CMD_ZONE_APPEND        = 0x7d,
 };
 
+enum NvmeIdCtrlCntrlType {
+    NVME_CNTRL_TYPE_IO          = 0x1,
+    NVME_CNTRL_TYPE_ADMIN       = 0x3,
+};
+
 typedef struct QEMU_PACKED NvmeDeleteQ {
     uint8_t     opcode;
     uint8_t     flags;
@@ -944,6 +949,8 @@ enum NvmeLogIdentifier {
     NVME_LOG_FW_SLOT_INFO   = 0x03,
     NVME_LOG_CHANGED_NSLIST = 0x04,
     NVME_LOG_CMD_EFFECTS    = 0x05,
+
+    NVME_LID_MAX            = 0x100,
 };
 
 typedef struct QEMU_PACKED NvmePSD {
@@ -1165,6 +1172,7 @@ enum NvmeFeatureIds {
     NVME_TIMESTAMP                  = 0xe,
     NVME_COMMAND_SET_PROFILE        = 0x19,
     NVME_SOFTWARE_PROGRESS_MARKER   = 0x80,
+
     NVME_FID_MAX                    = 0x100,
 };
 
