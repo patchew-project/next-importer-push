@@ -690,13 +690,35 @@ QemuCocoaView *cocoaView;
     NSPoint p = [self screenLocationOfEvent:event];
     NSUInteger modifiers = [event modifierFlags];
 
-    // emulate caps lock keydown and keyup
+    /*
+     * If -[NSEvent modifierFlags] has NSEventModifierFlagCapsLock,
+     * toggle the current CapsLock state by firing "up" and "down" events in
+     * sequence.
+     */
     if (!!(modifiers & NSEventModifierFlagCapsLock) !=
         qkbd_state_modifier_get(kbd, QKBD_MOD_CAPSLOCK)) {
         qkbd_state_key_event(kbd, Q_KEY_CODE_CAPS_LOCK, true);
         qkbd_state_key_event(kbd, Q_KEY_CODE_CAPS_LOCK, false);
     }
 
+    /*
+     * Check for other flags of -[NSEvent modifierFlags].
+     *
+     * If a flag is not set, fire "up" events for all keys which correspond to
+     * the flag. Note that "down" events are not fired here because the flags
+     * checked here do not tell what exact keys are down.
+     *
+     * These operations are performed for any events because the modifier state
+     * may change while the application is inactive (i.e. no events fire) and
+     * we want to detect it as early as possible.
+     *
+     * Up events corresponding to a modifier flag update the current modifier
+     * state tracked with QKbdState but they are not fired unless all keys which
+     * match to the flag are up. Therefore, it cannot synchornize Cocoa and
+     * QkbdState if one of the keys is down. It is still nice that any
+     * desynchronization can be fixed by completely leaving your hands from the
+     * keyboard.
+     */
     if (!(modifiers & NSEventModifierFlagShift)) {
         qkbd_state_key_event(kbd, Q_KEY_CODE_SHIFT, false);
         qkbd_state_key_event(kbd, Q_KEY_CODE_SHIFT_R, false);
@@ -716,6 +738,14 @@ QemuCocoaView *cocoaView;
 
     switch ([event type]) {
         case NSEventTypeFlagsChanged:
+            /*
+             * If the state of the key corresponding to -[NSEvent keyCode] is
+             * not updated by checking -[NSEvent modifierFlags], update it here.
+             * It means -[NSEvent keyCode] does not represent CapsLock and
+             * the corresponding modifier flag is set.
+             * [self toggleKey] peeks QkbdState so it correctly works only when
+             * it is synchornized with Cocoa.
+             */
             switch ([event keyCode]) {
                 case kVK_Shift:
                     if (!!(modifiers & NSEventModifierFlagShift)) {
