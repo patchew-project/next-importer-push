@@ -45,6 +45,12 @@ This option lacked the possibility to specify an audio backend device.
 Use ``-device usb-audio`` now instead (and specify a corresponding USB
 host controller or ``-usb`` if necessary).
 
+``-usbdevice ccid`` (removed in 6.0)
+'''''''''''''''''''''''''''''''''''''
+
+This option was undocumented and not used in the field.
+Use `-device usb-ccid`` instead.
+
 
 QEMU Machine Protocol (QMP) commands
 ------------------------------------
