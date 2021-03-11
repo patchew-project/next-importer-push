@@ -9,6 +9,7 @@
 
 #define NVME_DEFAULT_ZONE_SIZE   (128 * MiB)
 #define NVME_DEFAULT_MAX_ZA_SIZE (128 * KiB)
+#define NVME_MAX_COMMANDS 0x100
 
 /*
  * Subsystem namespace list for allocated namespaces should be larger than
@@ -28,6 +29,7 @@ typedef struct NvmeParams {
     bool     use_intel_id;
     uint8_t  zasl;
     bool     legacy_cmb;
+    uint16_t oncs;
 } NvmeParams;
 
 typedef struct NvmeAsyncEvent {
@@ -210,6 +212,11 @@ typedef struct NvmeCtrl {
     NvmeCQueue      admin_cq;
     NvmeIdCtrl      id_ctrl;
     NvmeFeatureVal  features;
+
+    struct {
+        uint32_t nvm[NVME_MAX_COMMANDS];
+        uint32_t zoned[NVME_MAX_COMMANDS];
+    } iocs;
 } NvmeCtrl;
 
 static inline NvmeNamespace *nvme_ns(NvmeCtrl *n, uint32_t nsid)
