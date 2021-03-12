@@ -240,6 +240,37 @@ static bool trans_SQ(DisasContext *ctx, arg_itype *a)
 }
 
 /*
+ * The TX79-specific instruction Store Quadword
+ *
+ * +--------+-------+-------+------------------------+
+ * | 011111 |  base |   rt  |           offset       | SQ
+ * +--------+-------+-------+------------------------+
+ *      6       5       5                 16
+ *
+ * has the same opcode as the Read Hardware Register instruction
+ *
+ * +--------+-------+-------+-------+-------+--------+
+ * | 011111 | 00000 |   rt  |   rd  | 00000 | 111011 | RDHWR
+ * +--------+-------+-------+-------+-------+--------+
+ *      6       5       5       5       5        6
+ *
+ * that is required, trapped and emulated by the Linux kernel. However, all
+ * RDHWR encodings yield address error exceptions on the TX79 since the SQ
+ * offset is odd. Therefore all valid SQ instructions can execute normally.
+ * In user mode, QEMU must verify the upper and lower 11 bits to distinguish
+ * between SQ and RDHWR, as the Linux kernel does.
+ */
+static bool trans_RDHWR_user(DisasContext *ctx, arg_rtype *a)
+{
+#if defined(CONFIG_USER_ONLY)
+    gen_rdhwr(ctx, a->rt, a->rd, 0);
+    return true;
+#else
+    return false;
+#endif
+}
+
+/*
  *     Multiply and Divide (19 instructions)
  *     -------------------------------------
  * PMULTW  rd, rs, rt        Parallel Multiply Word
