@@ -406,7 +406,7 @@ static void lo_map_init(struct lo_map *map)
 
 static void lo_map_destroy(struct lo_map *map)
 {
-    free(map->elems);
+    g_free(map->elems);
 }
 
 static int lo_map_grow(struct lo_map *map, size_t new_nelems)
@@ -418,7 +418,7 @@ static int lo_map_grow(struct lo_map *map, size_t new_nelems)
         return 1;
     }
 
-    new_elems = realloc(map->elems, sizeof(map->elems[0]) * new_nelems);
+    new_elems = g_realloc_n(map->elems, new_nelems, sizeof(map->elems[0]));
     if (!new_elems) {
         return 0;
     }
@@ -556,7 +556,7 @@ static void lo_inode_put(struct lo_data *lo, struct lo_inode **inodep)
 
     if (g_atomic_int_dec_and_test(&inode->refcount)) {
         close(inode->fd);
-        free(inode);
+        g_free(inode);
     }
 }
 
@@ -911,7 +911,7 @@ static void posix_locks_value_destroy(gpointer data)
      * closing this fd should release all OFD locks.
      */
     close(plock->fd);
-    free(plock);
+    g_free(plock);
 }
 
 static int do_statx(struct lo_data *lo, int dirfd, const char *pathname,
@@ -1027,7 +1027,7 @@ static int lo_do_lookup(fuse_req_t req, fuse_ino_t parent, const char *name,
     if (inode) {
         close(newfd);
     } else {
-        inode = calloc(1, sizeof(struct lo_inode));
+        inode = g_try_new0(struct lo_inode, 1);
         if (!inode) {
             goto out_err;
         }
@@ -1568,7 +1568,7 @@ static void lo_dirp_put(struct lo_dirp **dp)
 
     if (g_atomic_int_dec_and_test(&d->refcount)) {
         closedir(d->dp);
-        free(d);
+        g_free(d);
     }
 }
 
@@ -1600,7 +1600,7 @@ static void lo_opendir(fuse_req_t req, fuse_ino_t ino,
     int fd;
     ssize_t fh;
 
-    d = calloc(1, sizeof(struct lo_dirp));
+    d = g_try_new0(struct lo_dirp, 1);
     if (d == NULL) {
         goto out_err;
     }
@@ -1642,7 +1642,7 @@ out_err:
         } else if (fd != -1) {
             close(fd);
         }
-        free(d);
+        g_free(d);
     }
     fuse_reply_err(req, error);
 }
@@ -1669,7 +1669,7 @@ static void lo_do_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
     }
 
     err = ENOMEM;
-    buf = calloc(1, size);
+    buf = g_try_malloc0(size);
     if (!buf) {
         goto error;
     }
@@ -1755,7 +1755,7 @@ error:
     } else {
         fuse_reply_buf(req, buf, size - rem);
     }
-    free(buf);
+    g_free(buf);
 }
 
 static void lo_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
@@ -1979,7 +1979,7 @@ static struct lo_inode_plock *lookup_create_plock_ctx(struct lo_data *lo,
         return plock;
     }
 
-    plock = malloc(sizeof(struct lo_inode_plock));
+    plock = g_try_new(struct lo_inode_plock, 1);
     if (!plock) {
         *err = ENOMEM;
         return NULL;
@@ -1990,7 +1990,7 @@ static struct lo_inode_plock *lookup_create_plock_ctx(struct lo_data *lo,
     fd = lo_inode_open(lo, inode, O_RDWR);
     if (fd < 0) {
         *err = -fd;
-        free(plock);
+        g_free(plock);
         return NULL;
     }
 
@@ -2767,7 +2767,7 @@ static void lo_getxattr(fuse_req_t req, fuse_ino_t ino, const char *in_name,
              ino, name, size);
 
     if (size) {
-        value = malloc(size);
+        value = g_try_malloc(size);
         if (!value) {
             goto out_err;
         }
@@ -2806,7 +2806,7 @@ static void lo_getxattr(fuse_req_t req, fuse_ino_t ino, const char *in_name,
         fuse_reply_xattr(req, ret);
     }
 out_free:
-    free(value);
+    g_free(value);
 
     if (fd >= 0) {
         close(fd);
@@ -2848,7 +2848,7 @@ static void lo_listxattr(fuse_req_t req, fuse_ino_t ino, size_t size)
              size);
 
     if (size) {
-        value = malloc(size);
+        value = g_try_malloc(size);
         if (!value) {
             goto out_err;
         }
@@ -2933,7 +2933,7 @@ static void lo_listxattr(fuse_req_t req, fuse_ino_t ino, size_t size)
         fuse_reply_xattr(req, ret);
     }
 out_free:
-    free(value);
+    g_free(value);
 
     if (fd >= 0) {
         close(fd);
