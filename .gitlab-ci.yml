@@ -223,7 +223,7 @@ build-system-centos:
   variables:
     IMAGE: centos8
     CONFIGURE_ARGS: --disable-nettle --enable-gcrypt --enable-fdt=system
-                    --enable-modules
+                    --enable-modules --enable-docs
     TARGETS: ppc64-softmmu or1k-softmmu s390x-softmmu
       x86_64-softmmu rx-softmmu sh4-softmmu nios2-softmmu
     MAKE_CHECK_ARGS: check-build
@@ -257,7 +257,7 @@ build-system-opensuse:
     job: amd64-opensuse-leap-container
   variables:
     IMAGE: opensuse-leap
-    CONFIGURE_ARGS: --enable-fdt=system
+    CONFIGURE_ARGS: --enable-docs --enable-fdt=system
     TARGETS: s390x-softmmu x86_64-softmmu aarch64-softmmu
     MAKE_CHECK_ARGS: check-build
   artifacts:
@@ -443,7 +443,7 @@ build-user-centos7:
     job: amd64-centos7-container
   variables:
     IMAGE: centos7
-    CONFIGURE_ARGS: --disable-system --disable-tools --disable-docs
+    CONFIGURE_ARGS: --disable-system --disable-tools
     MAKE_CHECK_ARGS: check-tcg
 
 build-some-softmmu-plugins:
