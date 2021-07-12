@@ -2201,7 +2201,6 @@ F: include/hw/southbridge/piix.h
 
 Firmware configuration (fw_cfg)
 M: Philippe Mathieu-Daudé <philmd@redhat.com>
-R: Laszlo Ersek <lersek@redhat.com>
 R: Gerd Hoffmann <kraxel@redhat.com>
 S: Supported
 F: docs/specs/fw_cfg.txt
@@ -2933,7 +2932,6 @@ F: include/hw/i2c/smbus_slave.h
 F: include/hw/i2c/smbus_eeprom.h
 
 Firmware schema specifications
-M: Laszlo Ersek <lersek@redhat.com>
 M: Philippe Mathieu-Daudé <philmd@redhat.com>
 R: Daniel P. Berrange <berrange@redhat.com>
 R: Kashyap Chamarthy <kchamart@redhat.com>
@@ -2941,7 +2939,6 @@ S: Maintained
 F: docs/interop/firmware.json
 
 EDK2 Firmware
-M: Laszlo Ersek <lersek@redhat.com>
 M: Philippe Mathieu-Daudé <philmd@redhat.com>
 S: Supported
 F: hw/i386/*ovmf*
