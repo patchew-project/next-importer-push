@@ -214,6 +214,8 @@ static void nbd_teardown_connection(BlockDriverState *bs)
     assert(!s->in_flight);
 
     if (s->ioc) {
+        qio_channel_set_force_quit(s->ioc, true);
+        qio_channel_coroutines_wake(s->ioc);
         qio_channel_shutdown(s->ioc, QIO_CHANNEL_SHUTDOWN_BOTH, NULL);
         yank_unregister_function(BLOCKDEV_YANK_INSTANCE(s->bs->node_name),
                                  nbd_yank, s->bs);
@@ -347,6 +349,7 @@ int coroutine_fn nbd_co_do_establish_connection(BlockDriverState *bs,
 
     /* successfully connected */
     s->state = NBD_CLIENT_CONNECTED;
+    qio_channel_set_force_quit(s->ioc, false);
     qemu_co_queue_restart_all(&s->free_sema);
 
     return 0;
@@ -377,6 +380,8 @@ static coroutine_fn void nbd_reconnect_attempt(BDRVNBDState *s)
 
     /* Finalize previous connection if any */
     if (s->ioc) {
+        qio_channel_set_force_quit(s->ioc, true);
+        qio_channel_coroutines_wake(s->ioc);
         qio_channel_detach_aio_context(QIO_CHANNEL(s->ioc));
         yank_unregister_function(BLOCKDEV_YANK_INSTANCE(s->bs->node_name),
                                  nbd_yank, s->bs);
