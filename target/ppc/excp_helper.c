@@ -1422,6 +1422,7 @@ static void powerpc_excp_books(PowerPCCPU *cpu, int excp)
 
         break;
     }
+#ifdef CONFIG_TCG
     case POWERPC_EXCP_ALIGN:     /* Alignment exception                      */
         /* Get rS/rD and rA from faulting opcode */
         /*
@@ -1431,6 +1432,7 @@ static void powerpc_excp_books(PowerPCCPU *cpu, int excp)
          */
         env->spr[SPR_DSISR] |= (env->error_code & 0x03FF0000) >> 16;
         break;
+#endif
     case POWERPC_EXCP_PROGRAM:   /* Program exception                        */
         switch (env->error_code & ~0xF) {
         case POWERPC_EXCP_FP:
